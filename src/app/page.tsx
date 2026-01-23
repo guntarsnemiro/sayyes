@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+export const runtime = 'edge';
+
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-6 md:p-24 bg-[var(--background)]">

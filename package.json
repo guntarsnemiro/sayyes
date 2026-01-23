@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:build": "npm run build && npx @cloudflare/next-on-pages",
     "deploy": "npm run pages:build && wrangler pages deploy",
     "db:migrate": "wrangler d1 execute sayyes-db --remote --file=db/schema.sql"
   },
