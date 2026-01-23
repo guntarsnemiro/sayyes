@@ -6,5 +6,11 @@ pages_build_output_dir = ".vercel/output/static"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "sayyes-db"
+database_name = "sayyes"
 database_id = "8f2f12fd-7056-4fbf-9e7e-975f1e27ff25"
+
+[vars]
+GOOGLE_CLIENT_ID = "87826650189-l09jtksugunm03ki8m95ujiblvb1ehdj.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "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"
+NEXT_PUBLIC_SITE_URL = "https://sayyesapp.com"
+NODE_VERSION = "20"
