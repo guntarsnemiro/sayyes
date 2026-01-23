@@ -6,9 +6,9 @@ import Link from 'next/link';
 export const runtime = 'edge';
 
 export default async function DashboardPage() {
-  // @ts-ignore
   const context = getRequestContext();
-  const db = context.env.DB;
+  const env = context.env as CloudflareEnv;
+  const db = env.DB;
   const user = await getSession(db);
 
   if (!user) {

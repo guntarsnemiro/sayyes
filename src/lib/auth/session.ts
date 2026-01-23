@@ -2,6 +2,21 @@ import { cookies } from 'next/headers';
 
 const SESSION_COOKIE_NAME = 'sayyes_session';
 
+interface SessionRow {
+  id: string;
+  user_id: string;
+  expires_at: string;
+}
+
+interface UserRow {
+  id: string;
+  email: string;
+  name?: string;
+  picture?: string;
+  couple_id?: string;
+  created_at: string;
+}
+
 export async function createSession(db: D1Database, userId: string) {
   const sessionId = crypto.randomUUID();
   const expiresAt = new Date();
@@ -33,14 +48,14 @@ export async function getSession(db: D1Database) {
   const session = await db
     .prepare('SELECT * FROM sessions WHERE id = ? AND expires_at > ?')
     .bind(sessionId, new Date().toISOString())
-    .first<any>();
+    .first<SessionRow>();
 
   if (!session) return null;
 
   const user = await db
     .prepare('SELECT * FROM users WHERE id = ?')
     .bind(session.user_id)
-    .first<any>();
+    .first<UserRow>();
 
   return user;
 }

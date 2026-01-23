@@ -27,7 +27,7 @@ export default function LoginPage() {
         const data = await res.json() as { error: string };
         setError(data.error || 'Something went wrong');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to send magic link');
     } finally {
       setLoading(false);

@@ -14,6 +14,24 @@ export function getGoogleAuthUrl(clientId: string, redirectUri: string) {
   return `${GOOGLE_AUTH_URL}?${params.toString()}`;
 }
 
+interface GoogleTokenResponse {
+  access_token: string;
+  expires_in: number;
+  scope: string;
+  token_type: string;
+  id_token: string;
+  error?: string;
+  error_description?: string;
+}
+
+interface GoogleUserInfo {
+  sub: string;
+  email: string;
+  name: string;
+  picture: string;
+  email_verified: boolean;
+}
+
 export async function getGoogleUser(code: string, clientId: string, clientSecret: string, redirectUri: string) {
   const tokenRes = await fetch(GOOGLE_TOKEN_URL, {
     method: 'POST',
@@ -27,18 +45,12 @@ export async function getGoogleUser(code: string, clientId: string, clientSecret
     }),
   });
 
-  const tokens = await tokenRes.json() as any;
+  const tokens = await tokenRes.json() as GoogleTokenResponse;
   if (tokens.error) throw new Error(tokens.error_description || tokens.error);
 
   const userRes = await fetch(GOOGLE_USERINFO_URL, {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   });
 
-  return await userRes.json() as {
-    sub: string;
-    email: string;
-    name: string;
-    picture: string;
-    email_verified: boolean;
-  };
+  return await userRes.json() as GoogleUserInfo;
 }

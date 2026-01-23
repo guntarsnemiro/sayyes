@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/auth/login?error=expired_token', request.url));
     }
 
-    let user = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first<any>();
+    const user = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first<{ id: string }>();
     
     let userId = user?.id;
     if (!userId) {

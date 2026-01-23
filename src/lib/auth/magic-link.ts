@@ -1,3 +1,9 @@
+interface MagicLinkRow {
+  id: string;
+  email: string;
+  expires_at: string;
+}
+
 export async function createMagicLink(db: D1Database, email: string) {
   const token = crypto.randomUUID();
   const expiresAt = new Date();
@@ -15,7 +21,7 @@ export async function verifyMagicLink(db: D1Database, token: string) {
   const link = await db
     .prepare('SELECT * FROM magic_links WHERE id = ? AND expires_at > ?')
     .bind(token, new Date().toISOString())
-    .first<any>();
+    .first<MagicLinkRow>();
 
   if (!link) return null;
 

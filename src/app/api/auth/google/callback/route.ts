@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     const googleUser = await getGoogleUser(code, clientId, clientSecret, redirectUri);
     
-    const db = env?.DB || (process.env as any).DB;
+    const db = env?.DB;
     if (!db) {
       throw new Error('Database not configured');
     }
