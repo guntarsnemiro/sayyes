@@ -1,0 +1,31 @@
+{
+  "name": "sayyes",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler pages dev --d1 DB=8f2f12fd-7056-4fbf-9e7e-975f1e27ff25 -- next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "pages:build": "npx @cloudflare/next-on-pages",
+    "deploy": "npm run pages:build && wrangler pages deploy",
+    "db:migrate": "wrangler d1 execute sayyes-db --remote --file=db/schema.sql"
+  },
+  "dependencies": {
+    "@cloudflare/next-on-pages": "1.13.16",
+    "next": "15.1.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.4",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wrangler": "^4.60.0"
+  }
+}

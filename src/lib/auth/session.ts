@@ -1,0 +1,57 @@
+import { cookies } from 'next/headers';
+
+const SESSION_COOKIE_NAME = 'sayyes_session';
+
+export async function createSession(db: D1Database, userId: string) {
+  const sessionId = crypto.randomUUID();
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 30);
+
+  await db
+    .prepare('INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)')
+    .bind(sessionId, userId, expiresAt.toISOString())
+    .run();
+
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    expires: expiresAt,
+    path: '/',
+  });
+
+  return sessionId;
+}
+
+export async function getSession(db: D1Database) {
+  const cookieStore = await cookies();
+  const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+
+  if (!sessionId) return null;
+
+  const session = await db
+    .prepare('SELECT * FROM sessions WHERE id = ? AND expires_at > ?')
+    .bind(sessionId, new Date().toISOString())
+    .first<any>();
+
+  if (!session) return null;
+
+  const user = await db
+    .prepare('SELECT * FROM users WHERE id = ?')
+    .bind(session.user_id)
+    .first<any>();
+
+  return user;
+}
+
+export async function deleteSession(db: D1Database) {
+  const cookieStore = await cookies();
+  const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+
+  if (sessionId) {
+    await db.prepare('DELETE FROM sessions WHERE id = ?').bind(sessionId).run();
+  }
+
+  cookieStore.delete(SESSION_COOKIE_NAME);
+}
