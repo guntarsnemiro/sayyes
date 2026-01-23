@@ -6,7 +6,9 @@ export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
+    const body = await request.json() as { email?: string };
+    const email = body.email;
+    
     if (!email || !email.includes('@')) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
     }
