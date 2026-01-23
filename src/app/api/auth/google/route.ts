@@ -6,7 +6,8 @@ export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   const context = getRequestContext();
-  const clientId = context?.env?.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const env = context?.env as CloudflareEnv | undefined;
+  const clientId = env?.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
   
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
   const redirectUri = `${siteUrl}/api/auth/google/callback`;

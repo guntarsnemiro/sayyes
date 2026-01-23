@@ -16,8 +16,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const context = getRequestContext();
-    const clientId = context?.env?.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = context?.env?.GOOGLE_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+    const env = context?.env as CloudflareEnv | undefined;
+    const clientId = env?.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = env?.GOOGLE_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
       throw new Error('Google credentials not configured');
@@ -28,8 +29,10 @@ export async function GET(request: NextRequest) {
 
     const googleUser = await getGoogleUser(code, clientId, clientSecret, redirectUri);
     
-    // @ts-ignore
-    const db = context.env.DB;
+    const db = env?.DB || (process.env as any).DB;
+    if (!db) {
+      throw new Error('Database not configured');
+    }
 
     await db.prepare(`
       INSERT INTO users (id, email, name, picture) 

@@ -11,12 +11,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
     }
 
-    // @ts-ignore
     const context = getRequestContext();
-    if (!context || !context.env || !context.env.DB) {
+    const env = context?.env as CloudflareEnv | undefined;
+    if (!env?.DB) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
     }
-    const db = context.env.DB;
+    const db = env.DB;
     const token = await createMagicLink(db, email);
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;

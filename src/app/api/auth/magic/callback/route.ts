@@ -14,9 +14,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // @ts-ignore
     const context = getRequestContext();
-    const db = context.env.DB;
+    const env = context?.env as CloudflareEnv | undefined;
+    const db = env?.DB;
+    if (!db) {
+      throw new Error('Database connection failed');
+    }
     const email = await verifyMagicLink(db, token);
 
     if (!email) {
