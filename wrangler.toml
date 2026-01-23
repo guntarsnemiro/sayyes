@@ -1,0 +1,10 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "sayyes"
+compatibility_date = "2024-04-03"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".next"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sayyes-db"
+database_id = "8f2f12fd-7056-4fbf-9e7e-975f1e27ff25"
