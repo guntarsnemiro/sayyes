@@ -28,9 +28,14 @@ jobs:
       - name: Convert to Cloudflare Pages
         run: npx @cloudflare/next-on-pages
 
+      - name: Check Output Directory
+        run: |
+          echo "Listing .vercel directory:"
+          ls -R .vercel || echo ".vercel not found"
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .vercel/output/static --project-name=sayyes
+          command: pages deploy .vercel/output --project-name=sayyes
