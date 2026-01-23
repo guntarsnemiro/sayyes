@@ -18,14 +18,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Build and Deploy
-        uses: cloudflare/next-on-pages-action@v1
+      - name: Build
+        run: npx @cloudflare/next-on-pages
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          projectName: sayyes
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          directory: .next
+          command: pages deploy .vercel/output/static --project-name=sayyes
