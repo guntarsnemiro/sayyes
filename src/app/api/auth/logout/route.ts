@@ -7,16 +7,17 @@ export const runtime = 'edge';
 export async function POST(request: NextRequest) {
   try {
     const context = getRequestContext();
-    const env = context?.env as CloudflareEnv | undefined;
-    const db = env?.DB;
+    const env = context.env as CloudflareEnv;
+    const db = env.DB;
 
     if (db) {
       await deleteSession(db);
     }
 
-    return NextResponse.redirect(new URL('/auth/login', request.url));
+    // Use 303 See Other to ensure the browser switches from POST to GET
+    return NextResponse.redirect(new URL('/auth/login', request.url), 303);
   } catch (err) {
     console.error('Logout error:', err);
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/', request.url), 303);
   }
 }

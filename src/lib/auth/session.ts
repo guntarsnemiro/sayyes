@@ -65,8 +65,15 @@ export async function deleteSession(db: D1Database) {
   const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
   if (sessionId) {
-    await db.prepare('DELETE FROM sessions WHERE id = ?').bind(sessionId).run();
+    try {
+      await db.prepare('DELETE FROM sessions WHERE id = ?').bind(sessionId).run();
+    } catch (e) {
+      console.error('Failed to delete session from DB:', e);
+    }
   }
 
-  cookieStore.delete(SESSION_COOKIE_NAME);
+  cookieStore.set(SESSION_COOKIE_NAME, '', {
+    expires: new Date(0),
+    path: '/',
+  });
 }

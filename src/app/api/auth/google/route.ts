@@ -6,15 +6,22 @@ export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   const context = getRequestContext();
-  const env = context?.env as CloudflareEnv | undefined;
-  const clientId = env?.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const env = context.env as CloudflareEnv;
   
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+  // In Cloudflare Workers, env vars are on the env object
+  const clientId = env.GOOGLE_CLIENT_ID;
+  
+  // Ensure we use a consistent site URL. 
+  // For Google OAuth, the redirect URI must be exactly what's configured in Google Console.
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
   const redirectUri = `${siteUrl}/api/auth/google/callback`;
 
   if (!clientId) {
-    console.error('GOOGLE_CLIENT_ID is missing from environment');
-    return NextResponse.json({ error: 'Google Client ID not configured' }, { status: 500 });
+    console.error('GOOGLE_CLIENT_ID is missing from Cloudflare environment');
+    return NextResponse.json({ 
+      error: 'Google Client ID not configured',
+      details: 'Ensure GOOGLE_CLIENT_ID is set in your Cloudflare dashboard or .dev.vars'
+    }, { status: 500 });
   }
 
   const url = getGoogleAuthUrl(clientId, redirectUri);

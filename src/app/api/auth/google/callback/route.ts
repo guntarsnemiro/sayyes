@@ -16,20 +16,24 @@ export async function GET(request: NextRequest) {
 
   try {
     const context = getRequestContext();
-    const env = context?.env as CloudflareEnv | undefined;
-    const clientId = env?.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = env?.GOOGLE_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+    const env = context.env as CloudflareEnv;
+    
+    const clientId = env.GOOGLE_CLIENT_ID;
+    const clientSecret = env.GOOGLE_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
+      console.error('Missing Google credentials:', { hasClientId: !!clientId, hasClientSecret: !!clientSecret });
       throw new Error('Google credentials not configured');
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+    const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
     const redirectUri = `${siteUrl}/api/auth/google/callback`;
+
+    console.log('Attempting Google token exchange with redirectUri:', redirectUri);
 
     const googleUser = await getGoogleUser(code, clientId, clientSecret, redirectUri);
     
-    const db = env?.DB;
+    const db = env.DB;
     if (!db) {
       throw new Error('Database not configured');
     }
