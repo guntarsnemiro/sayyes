@@ -31,7 +31,7 @@ export default function InvitePage() {
       } else {
         setError(data.error || 'Failed to send invitation');
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -49,7 +49,7 @@ export default function InvitePage() {
           </div>
           <h1 className="text-2xl font-light text-[var(--primary)]">Invitation Sent</h1>
           <p className="text-[var(--muted)]">
-            We've sent a connection request to <span className="font-medium text-[var(--primary)]">{email}</span>.
+            We&apos;ve sent a connection request to <span className="font-medium text-[var(--primary)]">{email}</span>.
           </p>
           <p className="text-xs text-[var(--muted)] uppercase tracking-widest pt-4">
             Redirecting to dashboard...
@@ -68,7 +68,7 @@ export default function InvitePage() {
           </Link>
           <h1 className="mt-8 text-2xl font-light text-[var(--primary)]">Invite your partner</h1>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Enter your partner's email to start your weekly connection together.
+            Enter your partner&apos;s email to start your weekly connection together.
           </p>
         </div>
 

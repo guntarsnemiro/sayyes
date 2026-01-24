@@ -1,6 +1,5 @@
 import { getRequestContext } from '@cloudflare/next-on-pages';
-import { getSession, createSession } from '@/lib/auth/session';
-import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/auth/session';
 import Link from 'next/link';
 
 export const runtime = 'edge';
@@ -46,10 +45,6 @@ export default async function AcceptInvitePage({ params }: InvitePageProps) {
   // 2. Check if the current user is logged in
   const currentUser = await getSession(db);
 
-  // 3. If logged in, we can process the acceptance
-  // We'll use a server action or a separate API route to actually "join", 
-  // but for the best UX, we'll show a "Confirm" button if logged in.
-  
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[var(--background)]">
       <div className="w-full max-w-sm space-y-8 text-center">
