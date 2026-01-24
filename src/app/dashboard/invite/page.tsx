@@ -23,7 +23,7 @@ export default function InvitePage() {
         body: JSON.stringify({ email }),
       });
 
-      const data = await res.json();
+      const data = await res.json() as { error?: string };
 
       if (res.ok) {
         setSuccess(true);
