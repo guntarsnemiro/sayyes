@@ -31,6 +31,15 @@ export const CHECKIN_CATEGORIES = [
   }
 ];
 
+export function getWeekDate() {
+  const now = new Date();
+  const day = now.getDay();
+  // Get the date of the most recent Monday
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(now.setDate(diff));
+  return monday.toISOString().split('T')[0];
+}
+
 export const ACTION_SUGGESTIONS: Record<string, string> = {
   emotional: "Share one thing you appreciated about your partner this week.",
   intimacy: "Dedicate 15 minutes to distraction-free physical connection or conversation.",
