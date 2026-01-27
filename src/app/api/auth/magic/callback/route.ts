@@ -27,12 +27,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/auth/login?error=expired_token', request.url));
     }
 
-    const user = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first<{ id: string }>();
+    const normalizedEmail = email.toLowerCase();
     
-    let userId = user?.id;
-    if (!userId) {
+    // Check if user already exists with this email (from Google or previous Magic Link)
+    const existingUser = await db.prepare('SELECT id, couple_id FROM users WHERE email = ?')
+      .bind(normalizedEmail)
+      .first<{ id: string, couple_id?: string }>();
+    
+    let userId: string;
+    
+    if (existingUser) {
+      userId = existingUser.id;
+    } else {
       userId = crypto.randomUUID();
-      await db.prepare('INSERT INTO users (id, email) VALUES (?, ?)').bind(userId, email).run();
+      await db.prepare('INSERT INTO users (id, email) VALUES (?, ?)').bind(userId, normalizedEmail).run();
     }
 
     await createSession(db, userId);

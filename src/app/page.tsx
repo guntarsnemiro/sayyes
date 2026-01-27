@@ -9,11 +9,13 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   const context = getRequestContext();
   const env = context.env as CloudflareEnv;
-  const db = env.DB;
-  const user = await getSession(db);
-
-  if (user) {
-    redirect('/dashboard');
+  const db = env?.DB;
+  
+  if (db) {
+    const user = await getSession(db);
+    if (user) {
+      redirect('/dashboard');
+    }
   }
 
   return (
