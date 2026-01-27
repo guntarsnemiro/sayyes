@@ -18,8 +18,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // 3. If NOT logged in and trying to access dashboard or checkin, go to login
-  if (!session && (pathname.startsWith('/dashboard') || pathname.startsWith('/checkin'))) {
+  // 3. Protected Routes
+  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/checkin');
+  if (!session && isProtectedRoute) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
 

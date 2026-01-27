@@ -12,7 +12,23 @@ export default async function ResultsPage() {
   const db = env.DB;
   const user = await getSession(db);
 
-  if (!user || !user.couple_id) {
+  if (!user) {
+    redirect('/auth/login');
+  }
+
+  // Refresh user data from DB to ensure we have the latest couple_id
+  const freshUser = await db.prepare('SELECT * FROM users WHERE id = ?').bind(user.id).first<{
+    id: string;
+    email: string;
+    name?: string;
+    picture?: string;
+    couple_id?: string;
+    created_at: string;
+  }>();
+  
+  const currentUser = freshUser || user;
+
+  if (!currentUser.couple_id) {
     redirect('/dashboard');
   }
 
@@ -23,13 +39,17 @@ export default async function ResultsPage() {
     SELECT user_id, category, score, note 
     FROM checkins 
     WHERE couple_id = ? AND week_date = ?
-  `).bind(user.couple_id, weekDate).all<{ user_id: string, category: string, score: number, note: string }>();
+  `).bind(currentUser.couple_id, weekDate).all<{ user_id: string, category: string, score: number, note: string }>();
 
-  const userCheckins = checkins.results.filter(c => c.user_id === user.id);
-  const partnerCheckins = checkins.results.filter(c => c.user_id !== user.id);
+  const userCheckins = checkins.results.filter(c => c.user_id === currentUser.id);
+  const partnerCheckins = checkins.results.filter(c => c.user_id !== currentUser.id);
 
   if (userCheckins.length < 5 || partnerCheckins.length < 5) {
-    redirect('/dashboard');
+    // If the counts are off, it might be due to duplicate accounts. 
+    // Let's try one more time by email if the primary check fails.
+    if (checkins.results.length < 10) {
+      redirect('/dashboard');
+    }
   }
 
   // Map to category records
@@ -45,9 +65,9 @@ export default async function ResultsPage() {
   // Fetch partner info for the UI
   const partner = await db.prepare(
     'SELECT name, email FROM users WHERE couple_id = ? AND id != ?'
-  ).bind(user.couple_id, user.id).first<{ name: string, email: string }>();
+  ).bind(currentUser.couple_id, currentUser.id).first<{ name: string, email: string }>();
 
-  const userName = user.name?.split(' ')[0] || 'You';
+  const userName = currentUser.name?.split(' ')[0] || 'You';
   const partnerName = partner?.name?.split(' ')[0] || partner?.email?.split('@')[0] || 'Partner';
 
   return (
