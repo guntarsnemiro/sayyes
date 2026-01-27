@@ -188,7 +188,7 @@ export default async function DashboardPage() {
               <div className="bg-stone-50 border border-[var(--accent)] rounded-3xl p-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-4">While you wait</p>
                 <h3 className="text-lg font-light text-[var(--primary)] mb-4 italic">
-                  &quot;What is one small thing ${partnerFirstName} did this week that you appreciated?&quot;
+                  &quot;What is one small thing {partnerFirstName} did this week that you appreciated?&quot;
                 </h3>
                 <p className="text-sm text-[var(--muted)]">
                   Take a second to tell them, or just hold it in your mind.
