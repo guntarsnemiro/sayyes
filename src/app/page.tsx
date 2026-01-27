@@ -145,9 +145,13 @@ export default async function Home() {
           <div className="space-y-2">
             <p className="text-sm font-medium text-[var(--primary)]">SayYes</p>
             <p className="text-xs text-[var(--muted)] uppercase tracking-widest">Not therapy. Privacy-first. Designed for intentionality.</p>
+            <p className="text-[10px] text-[var(--muted)] max-w-xs mx-auto leading-relaxed pt-2">
+              SayYes is built by a small independent team focused on privacy-first tools for long-term relationships.
+            </p>
           </div>
           
           <div className="flex justify-center gap-8 text-[10px] text-[var(--muted)] uppercase tracking-widest">
+            <Link href="/how-it-works" className="hover:text-[var(--primary)] transition-colors">How it works</Link>
             <Link href="/privacy" className="hover:text-[var(--primary)] transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-[var(--primary)] transition-colors">Terms of Service</Link>
             <a href="mailto:info@sayyesapp.com" className="hover:text-[var(--primary)] transition-colors">info@sayyesapp.com</a>
