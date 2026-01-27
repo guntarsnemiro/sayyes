@@ -46,21 +46,27 @@ export async function GET(request: NextRequest) {
 
     let userId = googleUser.sub;
 
+    // Link to couple if another account with this email is already connected
+    const coupleLink = await db.prepare('SELECT couple_id FROM users WHERE email = ? AND couple_id IS NOT NULL LIMIT 1')
+      .bind(googleUser.email.toLowerCase())
+      .first<{ couple_id: string }>();
+
     if (existingUser) {
       userId = existingUser.id;
-      // Update existing user with Google info
+      // Update existing user with Google info and couple_id if found
       await db.prepare(`
         UPDATE users SET 
           name = ?, 
-          picture = ?
+          picture = ?,
+          couple_id = COALESCE(couple_id, ?)
         WHERE id = ?
-      `).bind(googleUser.name, googleUser.picture, userId).run();
+      `).bind(googleUser.name, googleUser.picture, coupleLink?.couple_id || null, userId).run();
     } else {
       // Create new user
       await db.prepare(`
-        INSERT INTO users (id, email, name, picture) 
-        VALUES (?, ?, ?, ?)
-      `).bind(userId, googleUser.email, googleUser.name, googleUser.picture).run();
+        INSERT INTO users (id, email, name, picture, couple_id) 
+        VALUES (?, ?, ?, ?, ?)
+      `).bind(userId, googleUser.email.toLowerCase(), googleUser.name, googleUser.picture, coupleLink?.couple_id || null).run();
     }
 
     await createSession(db, userId);

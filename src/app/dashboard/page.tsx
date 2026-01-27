@@ -28,6 +28,21 @@ export default async function DashboardPage() {
   
   const currentUser = freshUser || user;
 
+  // AUTO-REPAIR: If user has no couple_id, check if they are part of an accepted invite
+  if (!currentUser.couple_id) {
+    const linkedCouple = await db.prepare(`
+      SELECT couple_id FROM users 
+      WHERE email = ? AND couple_id IS NOT NULL 
+      LIMIT 1
+    `).bind(currentUser.email).first<{ couple_id: string }>();
+
+    if (linkedCouple) {
+      await db.prepare('UPDATE users SET couple_id = ? WHERE id = ?')
+        .bind(linkedCouple.couple_id, currentUser.id).run();
+      currentUser.couple_id = linkedCouple.couple_id;
+    }
+  }
+
   const weekDate = getWeekDate();
   
   // Check couple status and partner info
