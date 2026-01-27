@@ -42,6 +42,14 @@ export default async function ResultsPage() {
   const alignment = calculateAlignment(userMap, partnerMap);
   const action = getPrimaryAction(alignment);
 
+  // Fetch partner info for the UI
+  const partner = await db.prepare(
+    'SELECT name, email FROM users WHERE couple_id = ? AND id != ?'
+  ).bind(user.couple_id, user.id).first<{ name: string, email: string }>();
+
+  const userName = user.name?.split(' ')[0] || 'You';
+  const partnerName = partner?.name?.split(' ')[0] || partner?.email?.split('@')[0] || 'Partner';
+
   return (
     <main className="flex min-h-screen flex-col bg-[var(--background)] p-6">
       <header className="flex justify-between items-center max-w-2xl mx-auto w-full mb-12">
@@ -54,7 +62,7 @@ export default async function ResultsPage() {
         <div className="w-12"></div>
       </header>
 
-      <div className="max-w-2xl mx-auto w-full space-y-8">
+      <div className="max-w-2xl mx-auto w-full space-y-8 pb-12">
         <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm text-center">
           <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-2">This week's focus</p>
           <h2 className="text-xl font-medium text-[var(--primary)] leading-relaxed">
@@ -63,10 +71,21 @@ export default async function ResultsPage() {
         </div>
 
         <div className="space-y-4">
+          <div className="flex justify-between px-6 text-[10px] text-[var(--muted)] uppercase tracking-widest">
+            <span>Category</span>
+            <div className="flex gap-4">
+              <span>{userName}</span>
+              <span>{partnerName}</span>
+            </div>
+          </div>
+          
           {CHECKIN_CATEGORIES.map((cat) => {
             const state = alignment[cat.id];
             const userScore = userMap[cat.id];
             const partnerScore = partnerMap[cat.id];
+            
+            const userNote = userCheckins.find(c => c.category === cat.id)?.note;
+            const partnerNote = partnerCheckins.find(c => c.category === cat.id)?.note;
 
             return (
               <div key={cat.id} className="bg-white border border-[var(--accent)] rounded-3xl p-6 shadow-sm">
@@ -95,12 +114,34 @@ export default async function ResultsPage() {
                       style={{ width: `${(Math.abs(userScore - partnerScore) / 5) * 100}%` }}
                     />
                   </div>
-                  <div className="flex gap-2 text-xs font-medium text-[var(--primary)]">
-                    <span>{userScore}</span>
-                    <span className="text-[var(--muted)]">/</span>
-                    <span>{partnerScore}</span>
+                  <div className="flex gap-4 text-xs font-medium text-[var(--primary)]">
+                    <span className={userScore < partnerScore ? 'opacity-50' : ''}>{userScore}</span>
+                    <span className={partnerScore < userScore ? 'opacity-50' : ''}>{partnerScore}</span>
                   </div>
                 </div>
+
+                {(userNote || partnerNote) && (
+                  <div className="mt-6 pt-4 border-t border-stone-50 space-y-3">
+                    {userNote && (
+                      <div className="flex gap-3">
+                        <div className="w-1 h-auto bg-stone-200 rounded-full" />
+                        <p className="text-xs text-[var(--muted)] italic leading-relaxed">
+                          <span className="not-italic font-medium text-[var(--primary)] uppercase text-[9px] block mb-1">{userName}</span>
+                          "{userNote}"
+                        </p>
+                      </div>
+                    )}
+                    {partnerNote && (
+                      <div className="flex gap-3">
+                        <div className="w-1 h-auto bg-stone-200 rounded-full" />
+                        <p className="text-xs text-[var(--muted)] italic leading-relaxed">
+                          <span className="not-italic font-medium text-[var(--primary)] uppercase text-[9px] block mb-1">{partnerName}</span>
+                          "{partnerNote}"
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}

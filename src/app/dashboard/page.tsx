@@ -87,6 +87,8 @@ export default async function DashboardPage() {
     partnerDone = (partnerCheckin?.count || 0) >= 5;
   }
 
+  const partnerName = partner?.name || partner?.email?.split('@')[0] || 'your partner';
+
   return (
     <main className="flex min-h-screen flex-col bg-[var(--background)] p-6">
       <header className="flex justify-between items-center max-w-2xl mx-auto w-full mb-12">
@@ -107,12 +109,12 @@ export default async function DashboardPage() {
           </h2>
           {partner && (
             <p className="text-xs text-[var(--muted)] uppercase tracking-widest">
-              Connected with {partner.name || partner.email.split('@')[0]}
+              Connected with {partnerName}
             </p>
           )}
           <p className="text-[var(--muted)] leading-relaxed mt-4">
             {userDone && partnerDone ? "This week's results are ready." : 
-             userDone ? "Waiting for your partner to finish." : 
+             userDone ? `Waiting for ${partnerName} to finish.` : 
              "Your weekly connection space is ready."}
           </p>
         </div>
@@ -133,13 +135,13 @@ export default async function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4">
-            <div className="bg-white border border-[var(--accent)] rounded-3xl p-6 flex justify-between items-center shadow-sm">
+          <div className="space-y-4">
+            <div className="bg-white border border-[var(--accent)] rounded-3xl p-6 flex justify-between items-center shadow-sm transition-all hover:border-[var(--primary)]/20">
               <div>
                 <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-1">Weekly Check-in</p>
                 <p className="text-[var(--primary)] font-medium">
                   {userDone && partnerDone ? 'Results are ready' : 
-                   userDone ? 'Waiting for partner' : 
+                   userDone ? `Waiting for ${partnerName}` : 
                    'Ready for this week'}
                 </p>
               </div>
@@ -157,6 +159,18 @@ export default async function DashboardPage() {
                 </div>
               )}
             </div>
+
+            {userDone && !partnerDone && (
+              <div className="bg-stone-50 border border-[var(--accent)] rounded-3xl p-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-4">While you wait</p>
+                <h3 className="text-lg font-light text-[var(--primary)] mb-4 italic">
+                  "What is one small thing {partnerName} did this week that you appreciated?"
+                </h3>
+                <p className="text-sm text-[var(--muted)]">
+                  Take a second to tell them, or just hold it in your mind.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
