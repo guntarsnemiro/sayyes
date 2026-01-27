@@ -28,6 +28,19 @@ export default async function DashboardPage() {
   
   const currentUser = freshUser || user;
 
+  // 1. CHECK COMMITMENT GATE (Onboarding)
+  if (currentUser.couple_id) {
+    const hasCommitment = await db.prepare(`
+      SELECT id FROM commitments 
+      WHERE user_id = ? 
+      LIMIT 1
+    `).bind(currentUser.id).first();
+
+    if (!hasCommitment) {
+      redirect('/commitment');
+    }
+  }
+
   // AUTO-REPAIR: Ensure all accounts with this email are synced to the same couple
   let activeCoupleId = currentUser.couple_id;
 
@@ -87,7 +100,8 @@ export default async function DashboardPage() {
     partnerDone = (partnerCheckin?.count || 0) >= 5;
   }
 
-  const partnerName = partner?.name || partner?.email?.split('@')[0] || 'your partner';
+  const userFirstName = currentUser.name?.split(' ')[0] || currentUser.email.split('@')[0];
+  const partnerFirstName = partner?.name?.split(' ')[0] || partner?.email?.split('@')[0] || 'your partner';
 
   return (
     <main className="flex min-h-screen flex-col bg-[var(--background)] p-6">
@@ -105,16 +119,16 @@ export default async function DashboardPage() {
       <div className="max-w-2xl mx-auto w-full space-y-8">
         <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm">
           <h2 className="text-2xl font-light text-[var(--primary)] mb-2">
-            Hello, {currentUser.name || currentUser.email.split('@')[0]}
+            Hello, {userFirstName}
           </h2>
           {partner && (
             <p className="text-xs text-[var(--muted)] uppercase tracking-widest">
-              Connected with {partnerName}
+              Connected with {partnerFirstName}
             </p>
           )}
           <p className="text-[var(--muted)] leading-relaxed mt-4">
             {userDone && partnerDone ? "This week's results are ready." : 
-             userDone ? `Waiting for ${partnerName} to finish.` : 
+             userDone ? `Waiting for ${partnerFirstName} to finish.` : 
              "Your weekly connection space is ready."}
           </p>
         </div>
@@ -141,7 +155,7 @@ export default async function DashboardPage() {
                 <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-1">Weekly Check-in</p>
                 <p className="text-[var(--primary)] font-medium">
                   {userDone && partnerDone ? 'Results are ready' : 
-                   userDone ? `Waiting for ${partnerName}` : 
+                   userDone ? `Waiting for ${partnerFirstName}` : 
                    'Ready for this week'}
                 </p>
               </div>
@@ -160,11 +174,21 @@ export default async function DashboardPage() {
               )}
             </div>
 
+            <div className="bg-white border border-[var(--accent)] rounded-3xl p-6 flex justify-between items-center shadow-sm transition-all hover:border-[var(--primary)]/20">
+              <div>
+                <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-1">Relationship Pulse</p>
+                <p className="text-[var(--primary)] font-medium">History & Trends</p>
+              </div>
+              <Link href="/dashboard/history" className="bg-stone-50 text-[var(--primary)] px-5 py-2 rounded-full text-sm font-medium hover:bg-stone-100 transition-colors">
+                History
+              </Link>
+            </div>
+
             {userDone && !partnerDone && (
               <div className="bg-stone-50 border border-[var(--accent)] rounded-3xl p-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-4">While you wait</p>
                 <h3 className="text-lg font-light text-[var(--primary)] mb-4 italic">
-                  &quot;What is one small thing {partnerName} did this week that you appreciated?&quot;
+                  &quot;What is one small thing ${partnerFirstName} did this week that you appreciated?&quot;
                 </h3>
                 <p className="text-sm text-[var(--muted)]">
                   Take a second to tell them, or just hold it in your mind.

@@ -51,5 +51,15 @@ CREATE TABLE IF NOT EXISTS checkins (
     FOREIGN KEY (couple_id) REFERENCES couples(id)
 );
 
+CREATE TABLE IF NOT EXISTS commitments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    couple_id TEXT NOT NULL,
+    status TEXT NOT NULL, -- 'yes', 'unsure', 'no'
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (couple_id) REFERENCES couples(id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_checkins_user_week ON checkins(user_id, week_date);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
