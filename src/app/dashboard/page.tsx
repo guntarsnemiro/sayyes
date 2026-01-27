@@ -29,16 +29,36 @@ export default async function DashboardPage() {
   const currentUser = freshUser || user;
 
   // AUTO-REPAIR: Ensure all accounts with this email are synced to the same couple
-  const emailGroup = await db.prepare(`
-    SELECT couple_id FROM users 
-    WHERE email = ? AND couple_id IS NOT NULL 
-    LIMIT 1
-  `).bind(currentUser.email.toLowerCase()).first<{ couple_id: string }>();
+  let activeCoupleId = currentUser.couple_id;
 
-  if (emailGroup?.couple_id && currentUser.couple_id !== emailGroup.couple_id) {
-    await db.prepare('UPDATE users SET couple_id = ? WHERE id = ?')
-      .bind(emailGroup.couple_id, currentUser.id).run();
-    currentUser.couple_id = emailGroup.couple_id;
+  if (!activeCoupleId) {
+    // 1. Check if any other user record with this email has a couple_id
+    const emailMatch = await db.prepare(`
+      SELECT couple_id FROM users 
+      WHERE LOWER(email) = LOWER(?) AND couple_id IS NOT NULL 
+      LIMIT 1
+    `).bind(currentUser.email).first<{ couple_id: string }>();
+
+    if (emailMatch) {
+      activeCoupleId = emailMatch.couple_id;
+    } else {
+      // 2. Check if there is an accepted invitation for this email
+      const inviteMatch = await db.prepare(`
+        SELECT couple_id FROM users 
+        WHERE id IN (
+          SELECT inviter_id FROM invitations 
+          WHERE LOWER(invitee_email) = LOWER(?) AND status = 'accepted'
+        ) AND couple_id IS NOT NULL LIMIT 1
+      `).bind(currentUser.email).first<{ couple_id: string }>();
+      
+      if (inviteMatch) activeCoupleId = inviteMatch.couple_id;
+    }
+
+    if (activeCoupleId) {
+      await db.prepare('UPDATE users SET couple_id = ? WHERE id = ?')
+        .bind(activeCoupleId, currentUser.id).run();
+      currentUser.couple_id = activeCoupleId;
+    }
   }
 
   const weekDate = getWeekDate();
