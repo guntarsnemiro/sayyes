@@ -107,7 +107,7 @@ export default async function Home() {
               but can&apos;t quite name it, or for those who simply want to protect their 
               connection from the drift before it starts.
             </p>
-            <p className="border-l-2 border-stone-200 pl-6 italic italic text-sm">
+            <p className="border-l-2 border-stone-200 pl-6 italic text-sm">
               Important: SayYes is not designed for relationships in crisis, situations involving 
               abuse, or couples who have already decided to separate. It is a tool for 
               intentional maintenance, not emergency intervention.

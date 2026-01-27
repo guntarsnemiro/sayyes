@@ -53,7 +53,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-xl font-medium text-[var(--primary)]">5. Limitation of Liability</h2>
             <p>
-              SayYes is provided "as is." We are not liable for any relationship 
+              SayYes is provided &quot;as is.&quot; We are not liable for any relationship 
               outcomes or data issues resulting from the use of this tool.
             </p>
           </section>

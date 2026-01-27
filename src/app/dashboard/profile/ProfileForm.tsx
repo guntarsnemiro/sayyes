@@ -28,7 +28,7 @@ export default function ProfileForm({ initialName, email }: { initialName: strin
         const data = await res.json() as { error?: string };
         setMessage({ type: 'error', text: data.error || 'Failed to update profile' });
       }
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: 'An unexpected error occurred' });
     } finally {
       setLoading(false);

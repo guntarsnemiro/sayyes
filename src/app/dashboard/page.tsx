@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/auth/session';
-import { getWeekDate, CHECKIN_CATEGORIES, calculateWeeklyScore } from '@/lib/checkin';
+import { getWeekDate, calculateWeeklyScore } from '@/lib/checkin';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
