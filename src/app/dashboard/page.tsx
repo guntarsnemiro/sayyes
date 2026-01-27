@@ -45,7 +45,6 @@ export default async function DashboardPage() {
   let activeCoupleId = currentUser.couple_id;
 
   if (!activeCoupleId) {
-    // 1. Check if any other user record with this email has a couple_id
     const emailMatch = await db.prepare(`
       SELECT couple_id FROM users 
       WHERE LOWER(email) = LOWER(?) AND couple_id IS NOT NULL 
@@ -55,7 +54,6 @@ export default async function DashboardPage() {
     if (emailMatch) {
       activeCoupleId = emailMatch.couple_id;
     } else {
-      // 2. Check if there is an accepted invitation for this email
       const inviteMatch = await db.prepare(`
         SELECT couple_id FROM users 
         WHERE id IN (
@@ -76,7 +74,6 @@ export default async function DashboardPage() {
 
   const weekDate = getWeekDate();
   
-  // Check couple status and partner info
   let partner = null;
   let userDone = false;
   let partnerDone = false;
@@ -86,22 +83,23 @@ export default async function DashboardPage() {
       'SELECT name, email FROM users WHERE couple_id = ? AND id != ?'
     ).bind(currentUser.couple_id, currentUser.id).first<{ name: string, email: string }>();
 
-    const checkins = await db.prepare(`
+    const checkinsRes = await db.prepare(`
       SELECT user_id, COUNT(DISTINCT category) as count 
       FROM checkins 
       WHERE couple_id = ? AND week_date = ? 
       GROUP BY user_id
     `).bind(currentUser.couple_id, weekDate).all<{ user_id: string, count: number }>();
 
-    const userCheckin = checkins.results.find(c => c.user_id === currentUser.id);
-    const partnerCheckin = checkins.results.find(c => c.user_id !== currentUser.id);
+    const checkins = checkinsRes.results || [];
+    const userCheckin = checkins.find(c => c.user_id === currentUser.id);
+    const partnerCheckin = checkins.find(c => c.user_id !== currentUser.id);
 
     userDone = (userCheckin?.count || 0) >= 5;
     partnerDone = (partnerCheckin?.count || 0) >= 5;
   }
 
-  const userFirstName = currentUser.name?.split(' ')[0] || currentUser.email.split('@')[0];
-  const partnerFirstName = partner?.name?.split(' ')[0] || partner?.email?.split('@')[0] || 'your partner';
+  const userFirstName = (currentUser.name || currentUser.email || '').split(' ')[0].split('@')[0];
+  const partnerFirstName = (partner?.name || partner?.email || 'your partner').split(' ')[0].split('@')[0];
 
   return (
     <main className="flex min-h-screen flex-col bg-[var(--background)] p-6">
