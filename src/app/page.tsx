@@ -150,7 +150,7 @@ export default async function Home() {
           <div className="flex justify-center gap-8 text-[10px] text-[var(--muted)] uppercase tracking-widest">
             <Link href="/privacy" className="hover:text-[var(--primary)] transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-[var(--primary)] transition-colors">Terms of Service</Link>
-            <a href="mailto:hello@sayyesapp.com" className="hover:text-[var(--primary)] transition-colors">hello@sayyesapp.com</a>
+            <a href="mailto:info@sayyesapp.com" className="hover:text-[var(--primary)] transition-colors">info@sayyesapp.com</a>
           </div>
 
           <p className="text-[10px] text-[var(--accent)]">

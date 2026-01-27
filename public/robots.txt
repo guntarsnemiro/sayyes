@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /checkin
+Disallow: /commitment
+Disallow: /api/
+
+Sitemap: https://sayyesapp.com/sitemap.xml
