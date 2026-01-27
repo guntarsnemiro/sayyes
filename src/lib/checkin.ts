@@ -74,3 +74,23 @@ export function calculateAlignment(answers1: Record<string, number>, answers2: R
   }
   return alignment;
 }
+
+export function calculateWeeklyScore(answers1: Record<string, number>, answers2: Record<string, number>): number {
+  let totalDiff = 0;
+  let categoriesCount = 0;
+
+  for (const cat of CHECKIN_CATEGORIES) {
+    if (answers1[cat.id] !== undefined && answers2[cat.id] !== undefined) {
+      totalDiff += Math.abs(answers1[cat.id] - answers2[cat.id]);
+      categoriesCount++;
+    }
+  }
+
+  if (categoriesCount === 0) return 0;
+
+  // Max difference per category is 4 (5-1). Total max diff = 4 * 5 = 20.
+  // We want a score where 100% is perfect alignment (diff = 0)
+  const maxDiff = categoriesCount * 4;
+  const score = Math.round(((maxDiff - totalDiff) / maxDiff) * 100);
+  return Math.max(0, score);
+}
