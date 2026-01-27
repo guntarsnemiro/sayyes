@@ -1,20 +1,22 @@
 import { createMagicLink } from '@/lib/auth/magic-link';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as { email?: string };
+    const body = await request.json() as { email?: string, inviteId?: string };
     const email = body.email;
+    const inviteId = body.inviteId;
     
     if (!email || !email.includes('@')) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
     }
 
     const context = getRequestContext();
-    const env = context?.env as CloudflareEnv | undefined;
+    const env = context.env as CloudflareEnv;
     if (!env?.DB) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
     }
@@ -23,6 +25,17 @@ export async function POST(request: NextRequest) {
 
     const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
     const magicLink = `${siteUrl}/api/auth/magic/callback?token=${token}`;
+
+    if (inviteId) {
+      const cookieStore = await cookies();
+      cookieStore.set('pending_invite', inviteId, { 
+        path: '/', 
+        maxAge: 3600, // 1 hour
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax'
+      });
+    }
 
     // Send email via Resend
     const resendApiKey = env.RESEND_API_KEY;
@@ -37,6 +50,7 @@ export async function POST(request: NextRequest) {
           from: 'SayYes <info@sayyesapp.com>',
           to: email,
           subject: 'Your Sign-in Link for SayYes',
+          text: `Click here to sign in to SayYes: ${magicLink}`, // Added plain text version
           html: `
             <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; padding: 40px 20px; color: #44403c;">
               <h1 style="font-size: 24px; font-weight: 300; margin-bottom: 24px;">SayYes</h1>
@@ -46,7 +60,8 @@ export async function POST(request: NextRequest) {
               <a href="${magicLink}" style="display: inline-block; background-color: #44403c; color: #ffffff; padding: 12px 32px; border-radius: 9999px; text-decoration: none; font-weight: 500;">
                 Sign In
               </a>
-              <p style="font-size: 12px; color: #a8a29e; margin-top: 40px;">
+              <p style="font-size: 12px; color: #a8a29e; margin-top: 40px; border-top: 1px solid #e5e5e5; pt: 20px;">
+                SayYes — A weekly connection for couples.<br>
                 If you didn't request this email, you can safely ignore it.
               </p>
             </div>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 function LoginContent() {
   const searchParams = useSearchParams();
+  const inviteId = searchParams.get('invite');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -29,7 +30,7 @@ function LoginContent() {
       const res = await fetch('/api/auth/magic', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, inviteId }),
       });
 
       if (res.ok) {
@@ -62,7 +63,7 @@ function LoginContent() {
 
         <div className="space-y-4">
           <a
-            href="/api/auth/google"
+            href={`/api/auth/google${inviteId ? `?invite=${inviteId}` : ''}`}
             className="flex w-full items-center justify-center gap-3 bg-white border border-[var(--accent)] text-[var(--primary)] px-6 py-3 rounded-full font-medium hover:bg-stone-50 active:scale-[0.98] transition-all"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

@@ -8,7 +8,7 @@ interface SessionRow {
   expires_at: string;
 }
 
-interface UserRow {
+export interface UserRow {
   id: string;
   email: string;
   name?: string;

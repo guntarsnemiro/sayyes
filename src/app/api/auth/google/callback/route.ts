@@ -2,6 +2,7 @@ import { getGoogleUser } from '@/lib/auth/google';
 import { createSession } from '@/lib/auth/session';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export const runtime = 'edge';
 
@@ -47,6 +48,14 @@ export async function GET(request: NextRequest) {
     `).bind(googleUser.sub, googleUser.email, googleUser.name, googleUser.picture).run();
 
     await createSession(db, googleUser.sub);
+
+    const cookieStore = await cookies();
+    const pendingInvite = cookieStore.get('pending_invite')?.value;
+    
+    if (pendingInvite) {
+      cookieStore.delete('pending_invite');
+      return NextResponse.redirect(new URL(`/invite/${pendingInvite}`, request.url));
+    }
 
     return NextResponse.redirect(new URL('/dashboard', request.url));
   } catch (err) {

@@ -1,10 +1,14 @@
 import { getGoogleAuthUrl } from '@/lib/auth/google';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const inviteId = searchParams.get('invite');
+
   const context = getRequestContext();
   const env = context.env as CloudflareEnv;
   
@@ -24,6 +28,18 @@ export async function GET(request: NextRequest) {
     }, { status: 500 });
   }
 
-  const url = getGoogleAuthUrl(clientId, redirectUri);
-  return NextResponse.redirect(url);
+  const response = NextResponse.redirect(getGoogleAuthUrl(clientId, redirectUri));
+
+  if (inviteId) {
+    const cookieStore = await cookies();
+    cookieStore.set('pending_invite', inviteId, { 
+      path: '/', 
+      maxAge: 3600, // 1 hour
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax'
+    });
+  }
+
+  return response;
 }

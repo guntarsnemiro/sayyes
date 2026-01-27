@@ -16,6 +16,18 @@ export default async function DashboardPage() {
     redirect('/auth/login');
   }
 
+  // Refresh user data from DB to ensure we have the latest couple_id
+  const freshUser = await db.prepare('SELECT * FROM users WHERE id = ?').bind(user.id).first<{
+    id: string;
+    email: string;
+    name?: string;
+    picture?: string;
+    couple_id?: string;
+    created_at: string;
+  }>();
+  
+  const currentUser = freshUser || user;
+
   const weekDate = getWeekDate();
   
   // Check couple status and partner info
@@ -23,20 +35,20 @@ export default async function DashboardPage() {
   let userDone = false;
   let partnerDone = false;
 
-  if (user.couple_id) {
+  if (currentUser.couple_id) {
     partner = await db.prepare(
       'SELECT name, email FROM users WHERE couple_id = ? AND id != ?'
-    ).bind(user.couple_id, user.id).first<{ name: string, email: string }>();
+    ).bind(currentUser.couple_id, currentUser.id).first<{ name: string, email: string }>();
 
     const checkins = await db.prepare(`
       SELECT user_id, COUNT(DISTINCT category) as count 
       FROM checkins 
       WHERE couple_id = ? AND week_date = ? 
       GROUP BY user_id
-    `).bind(user.couple_id, weekDate).all<{ user_id: string, count: number }>();
+    `).bind(currentUser.couple_id, weekDate).all<{ user_id: string, count: number }>();
 
-    const userCheckin = checkins.results.find(c => c.user_id === user.id);
-    const partnerCheckin = checkins.results.find(c => c.user_id !== user.id);
+    const userCheckin = checkins.results.find(c => c.user_id === currentUser.id);
+    const partnerCheckin = checkins.results.find(c => c.user_id !== currentUser.id);
 
     userDone = (userCheckin?.count || 0) >= 5;
     partnerDone = (partnerCheckin?.count || 0) >= 5;
@@ -58,7 +70,7 @@ export default async function DashboardPage() {
       <div className="max-w-2xl mx-auto w-full space-y-8">
         <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm">
           <h2 className="text-2xl font-light text-[var(--primary)] mb-2">
-            Hello, {user.name || user.email.split('@')[0]}
+            Hello, {currentUser.name || currentUser.email.split('@')[0]}
           </h2>
           {partner && (
             <p className="text-xs text-[var(--muted)] uppercase tracking-widest">
@@ -72,7 +84,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        {!user.couple_id ? (
+        {!currentUser.couple_id ? (
           <div className="bg-stone-50 border border-dashed border-[var(--accent)] rounded-3xl p-8 text-center shadow-sm">
             <h3 className="text-lg font-medium text-[var(--primary)] mb-4">
               Connect with your partner

@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
           from: 'SayYes <info@sayyesapp.com>',
           to: inviteeEmail,
           subject: `${user.name || 'Your partner'} invited you to SayYes`,
+          text: `Join your partner on SayYes: ${inviteLink}`, // Added plain text version
           html: `
             <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; padding: 40px 20px; color: #44403c;">
               <h1 style="font-size: 24px; font-weight: 300; margin-bottom: 24px;">SayYes</h1>
@@ -60,8 +61,9 @@ export async function POST(request: NextRequest) {
               <a href="${inviteLink}" style="display: inline-block; background-color: #44403c; color: #ffffff; padding: 12px 32px; border-radius: 9999px; text-decoration: none; font-weight: 500;">
                 Join your partner
               </a>
-              <p style="font-size: 12px; color: #a8a29e; margin-top: 40px;">
-                SayYes helps couples stay aligned through simple weekly check-ins.
+              <p style="font-size: 12px; color: #a8a29e; margin-top: 40px; border-top: 1px solid #e5e5e5; pt: 20px;">
+                SayYes — A weekly connection for couples.<br>
+                You are receiving this because your partner invited you.
               </p>
             </div>
           `,

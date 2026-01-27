@@ -2,6 +2,7 @@ import { verifyMagicLink } from '@/lib/auth/magic-link';
 import { createSession } from '@/lib/auth/session';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export const runtime = 'edge';
 
@@ -35,6 +36,14 @@ export async function GET(request: NextRequest) {
     }
 
     await createSession(db, userId);
+
+    const cookieStore = await cookies();
+    const pendingInvite = cookieStore.get('pending_invite')?.value;
+    
+    if (pendingInvite) {
+      cookieStore.delete('pending_invite');
+      return NextResponse.redirect(new URL(`/invite/${pendingInvite}`, request.url));
+    }
 
     return NextResponse.redirect(new URL('/dashboard', request.url));
   } catch (err) {
