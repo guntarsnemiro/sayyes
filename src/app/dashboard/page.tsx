@@ -28,7 +28,51 @@ export default async function DashboardPage() {
   
   const currentUser = freshUser || user;
 
-  // AUTO-REPAIR logic... (omitted for brevity in thinking, but will preserve in write)
+  // 1. AUTO-REPAIR: Ensure all accounts with this email are synced to the same couple
+  let activeCoupleId = currentUser.couple_id;
+
+  if (!activeCoupleId) {
+    // Check if any other user record with this email has a couple_id
+    const emailMatch = await db.prepare(`
+      SELECT couple_id FROM users 
+      WHERE LOWER(email) = LOWER(?) AND couple_id IS NOT NULL 
+      LIMIT 1
+    `).bind(currentUser.email).first<{ couple_id: string }>();
+
+    if (emailMatch) {
+      activeCoupleId = emailMatch.couple_id;
+    } else {
+      // Check if there is an accepted invitation for this email
+      const inviteMatch = await db.prepare(`
+        SELECT couple_id FROM users 
+        WHERE id IN (
+          SELECT inviter_id FROM invitations 
+          WHERE LOWER(invitee_email) = LOWER(?) AND status = 'accepted'
+        ) AND couple_id IS NOT NULL LIMIT 1
+      `).bind(currentUser.email).first<{ couple_id: string }>();
+      
+      if (inviteMatch) activeCoupleId = inviteMatch.couple_id;
+    }
+
+    if (activeCoupleId) {
+      await db.prepare('UPDATE users SET couple_id = ? WHERE id = ?')
+        .bind(activeCoupleId, currentUser.id).run();
+      currentUser.couple_id = activeCoupleId;
+    }
+  }
+
+  // 2. CHECK COMMITMENT GATE (Only if in a couple)
+  if (currentUser.couple_id) {
+    const hasCommitment = await db.prepare(`
+      SELECT id FROM commitments 
+      WHERE user_id = ? 
+      LIMIT 1
+    `).bind(currentUser.id).first();
+
+    if (!hasCommitment) {
+      redirect('/commitment');
+    }
+  }
 
   const weekDate = getWeekDate();
   
