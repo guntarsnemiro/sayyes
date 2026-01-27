@@ -172,16 +172,6 @@ export default async function DashboardPage() {
               )}
             </div>
 
-            <div className="bg-white border border-[var(--accent)] rounded-3xl p-6 flex justify-between items-center shadow-sm transition-all hover:border-[var(--primary)]/20">
-              <div>
-                <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-1">Relationship Pulse</p>
-                <p className="text-[var(--primary)] font-medium">History & Trends</p>
-              </div>
-              <Link href="/dashboard/history" className="bg-stone-50 text-[var(--primary)] px-5 py-2 rounded-full text-sm font-medium hover:bg-stone-100 transition-colors">
-                History
-              </Link>
-            </div>
-
             {userDone && !partnerDone && (
               <div className="bg-stone-50 border border-[var(--accent)] rounded-3xl p-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-4">While you wait</p>

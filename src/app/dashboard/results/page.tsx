@@ -6,8 +6,7 @@ import Link from 'next/link';
 
 export const runtime = 'edge';
 
-export default async function ResultsPage({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
-  const { week } = await searchParams;
+export default async function ResultsPage() {
   const context = getRequestContext();
   const env = context.env as CloudflareEnv;
   const db = env.DB;
@@ -33,7 +32,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
     redirect('/dashboard');
   }
 
-  const weekDate = week || getWeekDate();
+  const weekDate = getWeekDate();
 
   // Fetch all checkins for this couple this week
   const checkins = await db.prepare(`
