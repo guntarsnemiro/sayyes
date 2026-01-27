@@ -155,9 +155,17 @@ export default async function DashboardPage() {
 
       <div className="max-w-2xl mx-auto w-full space-y-8">
         <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm">
-          <h2 className="text-2xl font-light text-[var(--primary)] mb-2">
-            Hello, {userFirstName}
-          </h2>
+          <div className="flex justify-between items-start mb-2">
+            <h2 className="text-2xl font-light text-[var(--primary)]">
+              Hello, {userFirstName}
+            </h2>
+            <Link 
+              href="/dashboard/profile" 
+              className="text-[10px] text-[var(--muted)] uppercase tracking-widest hover:text-[var(--primary)] transition-colors border border-[var(--accent)] px-3 py-1 rounded-full"
+            >
+              Settings
+            </Link>
+          </div>
           {partner && (
             <p className="text-xs text-[var(--muted)] uppercase tracking-widest">
               Connected with {partnerFirstName}
