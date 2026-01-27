@@ -34,8 +34,8 @@ export async function createSession(db: D1Database, userId: string) {
     sameSite: 'lax',
     expires: expiresAt,
     path: '/',
-    // Setting domain to ensure it works on both www and root
-    domain: process.env.NODE_ENV === 'production' ? '.sayyesapp.com' : undefined,
+    // Using root domain without the leading dot for better mobile compatibility
+    domain: process.env.NODE_ENV === 'production' ? 'sayyesapp.com' : undefined,
   });
 
   return sessionId;
