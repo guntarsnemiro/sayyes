@@ -28,23 +28,11 @@ export default async function DashboardPage() {
   
   const currentUser = freshUser || user;
 
-  // 1. CHECK COMMITMENT GATE (Onboarding)
-  if (currentUser.couple_id) {
-    const hasCommitment = await db.prepare(`
-      SELECT id FROM commitments 
-      WHERE user_id = ? 
-      LIMIT 1
-    `).bind(currentUser.id).first();
-
-    if (!hasCommitment) {
-      redirect('/commitment');
-    }
-  }
-
   // AUTO-REPAIR: Ensure all accounts with this email are synced to the same couple
   let activeCoupleId = currentUser.couple_id;
 
   if (!activeCoupleId) {
+    // 1. Check if any other user record with this email has a couple_id
     const emailMatch = await db.prepare(`
       SELECT couple_id FROM users 
       WHERE LOWER(email) = LOWER(?) AND couple_id IS NOT NULL 
@@ -54,6 +42,7 @@ export default async function DashboardPage() {
     if (emailMatch) {
       activeCoupleId = emailMatch.couple_id;
     } else {
+      // 2. Check if there is an accepted invitation for this email
       const inviteMatch = await db.prepare(`
         SELECT couple_id FROM users 
         WHERE id IN (
@@ -74,6 +63,7 @@ export default async function DashboardPage() {
 
   const weekDate = getWeekDate();
   
+  // Check couple status and partner info
   let partner = null;
   let userDone = false;
   let partnerDone = false;
@@ -125,7 +115,7 @@ export default async function DashboardPage() {
             </p>
           )}
           <p className="text-[var(--muted)] leading-relaxed mt-4">
-            {userDone && partnerDone ? "This week's results are ready." : 
+            {userDone && partnerDone ? "This week&apos;s results are ready." : 
              userDone ? `Waiting for ${partnerFirstName} to finish.` : 
              "Your weekly connection space is ready."}
           </p>
