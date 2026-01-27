@@ -63,14 +63,20 @@ export default async function DashboardPage() {
 
   // 2. CHECK COMMITMENT GATE (Only if in a couple)
   if (currentUser.couple_id) {
-    const hasCommitment = await db.prepare(`
-      SELECT id FROM commitments 
-      WHERE user_id = ? 
-      LIMIT 1
-    `).bind(currentUser.id).first();
+    try {
+      const hasCommitment = await db.prepare(`
+        SELECT id FROM commitments 
+        WHERE user_id = ? 
+        LIMIT 1
+      `).bind(currentUser.id).first();
 
-    if (!hasCommitment) {
-      redirect('/commitment');
+      if (!hasCommitment) {
+        redirect('/commitment');
+      }
+    } catch (e) {
+      console.error('Commitment check failed:', e);
+      // Fallback: if the table is still being created or has issues, 
+      // don't crash the whole dashboard, just skip the gate for this request.
     }
   }
 
