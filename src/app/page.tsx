@@ -1,8 +1,20 @@
 import Link from 'next/link';
+import { getSession } from '@/lib/auth/session';
+import { getRequestContext } from '@cloudflare/next-on-pages';
+import { redirect } from 'next/navigation';
 
 export const runtime = 'edge';
 
-export default function Home() {
+export default async function Home() {
+  const context = getRequestContext();
+  const env = context.env as CloudflareEnv;
+  const db = env.DB;
+  const user = await getSession(db);
+
+  if (user) {
+    redirect('/dashboard');
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-6 md:p-24 bg-[var(--background)]">
       <div className="z-10 w-full max-w-sm flex flex-col items-center text-center mt-20">

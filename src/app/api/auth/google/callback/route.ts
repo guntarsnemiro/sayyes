@@ -39,15 +39,31 @@ export async function GET(request: NextRequest) {
       throw new Error('Database not configured');
     }
 
-    await db.prepare(`
-      INSERT INTO users (id, email, name, picture) 
-      VALUES (?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET 
-        name = excluded.name,
-        picture = excluded.picture
-    `).bind(googleUser.sub, googleUser.email, googleUser.name, googleUser.picture).run();
+    // First, check if a user with this email already exists
+    const existingUser = await db.prepare('SELECT id FROM users WHERE email = ?')
+      .bind(googleUser.email)
+      .first<{ id: string }>();
 
-    await createSession(db, googleUser.sub);
+    let userId = googleUser.sub;
+
+    if (existingUser) {
+      userId = existingUser.id;
+      // Update existing user with Google info
+      await db.prepare(`
+        UPDATE users SET 
+          name = ?, 
+          picture = ?
+        WHERE id = ?
+      `).bind(googleUser.name, googleUser.picture, userId).run();
+    } else {
+      // Create new user
+      await db.prepare(`
+        INSERT INTO users (id, email, name, picture) 
+        VALUES (?, ?, ?, ?)
+      `).bind(userId, googleUser.email, googleUser.name, googleUser.picture).run();
+    }
+
+    await createSession(db, userId);
 
     const cookieStore = await cookies();
     const pendingInvite = cookieStore.get('pending_invite')?.value;
