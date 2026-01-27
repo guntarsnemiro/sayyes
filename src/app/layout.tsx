@@ -13,8 +13,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SayYes | A Weekly Connection for Couples",
-  description: "A calm, private space for couples to stay aligned through intentional weekly check-ins.",
+  title: "SayYes — A weekly connection for couples who choose to stay together",
+  description: "SayYes is a calm, weekly relationship check-in for couples who want to stay together. Not therapy. No pressure. Just clarity and connection.",
+  alternates: {
+    canonical: "https://sayyesapp.com/",
+  },
+  openGraph: {
+    title: "SayYes — A weekly connection for couples who choose to stay together",
+    description: "SayYes is a calm, weekly relationship check-in for couples who want to stay together. Not therapy. No pressure. Just clarity and connection.",
+    url: "https://sayyesapp.com/",
+    siteName: "SayYes",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SayYes — A weekly connection for couples who choose to stay together",
+    description: "SayYes is a calm, weekly relationship check-in for couples who want to stay together. Not therapy. No pressure. Just clarity and connection.",
+  },
 };
 
 export default function RootLayout({
