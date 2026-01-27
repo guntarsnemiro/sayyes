@@ -6,4 +6,5 @@ interface CloudflareEnv {
   GOOGLE_CLIENT_SECRET: string;
   RESEND_API_KEY: string;
   NEXT_PUBLIC_SITE_URL: string;
+  CRON_SECRET: string;
 }

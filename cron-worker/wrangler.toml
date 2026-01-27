@@ -1,0 +1,7 @@
+name = "sayyes-cron-heartbeat"
+main = "src/index.ts"
+compatibility_date = "2026-01-23"
+
+# Fixed Trigger Format
+[triggers]
+crons = ["0 9 * * 1"]

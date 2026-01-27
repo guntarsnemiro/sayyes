@@ -84,9 +84,9 @@ export default async function ResultsPage() {
 
       <div className="max-w-2xl mx-auto w-full space-y-8 pb-12">
         <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm text-center">
-          <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-2">This week&apos;s focus</p>
+          <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-2">This week's focus</p>
           <h2 className="text-xl font-medium text-[var(--primary)] leading-relaxed">
-            &quot;{action}&quot;
+            "{action}"
           </h2>
         </div>
 
@@ -147,7 +147,7 @@ export default async function ResultsPage() {
                         <div className="w-1 h-auto bg-stone-200 rounded-full" />
                         <p className="text-xs text-[var(--muted)] italic leading-relaxed">
                           <span className="not-italic font-medium text-[var(--primary)] uppercase text-[9px] block mb-1">{userName}</span>
-                          &quot;{userNote}&quot;
+                          "{userNote}"
                         </p>
                       </div>
                     )}
@@ -156,7 +156,7 @@ export default async function ResultsPage() {
                         <div className="w-1 h-auto bg-stone-200 rounded-full" />
                         <p className="text-xs text-[var(--muted)] italic leading-relaxed">
                           <span className="not-italic font-medium text-[var(--primary)] uppercase text-[9px] block mb-1">{partnerName}</span>
-                          &quot;{partnerNote}&quot;
+                          "{partnerNote}"
                         </p>
                       </div>
                     )}
