@@ -39,9 +39,6 @@ export default function DeleteAccount({ userName }: { userName: string }) {
   if (!isOpen) {
     return (
       <div className="mt-12 pt-8 border-t border-stone-100">
-        <h3 className="text-xs text-rose-500 uppercase tracking-widest font-medium mb-4 text-center">
-          Danger Zone
-        </h3>
         <button
           onClick={() => setIsOpen(true)}
           className="w-full border border-rose-100 text-rose-500 px-6 py-3 rounded-full text-xs font-medium hover:bg-rose-50 transition-all"

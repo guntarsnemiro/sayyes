@@ -276,7 +276,7 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {history.length > 1 && (
+            {history.length > 0 && (
               <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm">
                 <div className="flex justify-between items-end mb-8">
                   <div>
@@ -300,35 +300,37 @@ export default async function DashboardPage() {
                   </div>
                 </div>
                 
-                <div className="h-32 w-full flex items-end gap-2">
-                  {history.map((h, i) => (
-                    <div key={h.week} className="flex-grow flex flex-col items-center group relative">
-                      {/* Tooltip on hover */}
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[var(--primary)] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                        {h.score}%
-                      </div>
-                      
-                      <div 
-                        className="w-full bg-stone-100 rounded-t-lg transition-all group-hover:bg-stone-200 relative overflow-hidden"
-                        style={{ height: `${h.score}%` }}
-                      >
+                {history.length > 1 && (
+                  <div className="h-32 w-full flex items-end gap-2">
+                    {history.map((h, i) => (
+                      <div key={h.week} className="flex-grow flex flex-col items-center group relative">
+                        {/* Tooltip on hover */}
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[var(--primary)] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                          {h.score}%
+                        </div>
+                        
                         <div 
-                          className="absolute bottom-0 left-0 right-0 bg-[var(--primary)] opacity-20"
-                          style={{ height: '100%' }}
-                        />
-                        {i === history.length - 1 && (
+                          className="w-full bg-stone-100 rounded-t-lg transition-all group-hover:bg-stone-200 relative overflow-hidden"
+                          style={{ height: `${h.score}%` }}
+                        >
                           <div 
-                            className="absolute bottom-0 left-0 right-0 bg-[var(--primary)] opacity-40 animate-pulse"
+                            className="absolute bottom-0 left-0 right-0 bg-[var(--primary)] opacity-20"
                             style={{ height: '100%' }}
                           />
-                        )}
+                          {i === history.length - 1 && (
+                            <div 
+                              className="absolute bottom-0 left-0 right-0 bg-[var(--primary)] opacity-40 animate-pulse"
+                              style={{ height: '100%' }}
+                            />
+                          )}
+                        </div>
+                        <p className="text-[8px] text-[var(--muted)] mt-2 uppercase tracking-tighter">
+                          {new Date(h.week).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </p>
                       </div>
-                      <p className="text-[8px] text-[var(--muted)] mt-2 uppercase tracking-tighter">
-                        {new Date(h.week).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
