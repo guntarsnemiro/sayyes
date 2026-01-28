@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/auth/session';
-import { getWeekDate, CHECKIN_CATEGORIES, calculateAlignment, getPrimaryAction } from '@/lib/checkin';
+import { getWeekDate, CHECKIN_CATEGORIES, calculateAlignment, getWeeklyFocus } from '@/lib/checkin';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -60,7 +60,7 @@ export default async function ResultsPage() {
   partnerCheckins.forEach(c => partnerMap[c.category] = c.score);
 
   const alignment = calculateAlignment(userMap, partnerMap);
-  const action = getPrimaryAction(alignment);
+  const weeklyFocus = getWeeklyFocus(userMap, partnerMap);
 
   // Fetch partner info for the UI
   const partner = await db.prepare(
@@ -83,13 +83,6 @@ export default async function ResultsPage() {
       </header>
 
       <div className="max-w-2xl mx-auto w-full space-y-8 pb-12">
-        <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm text-center">
-          <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-2">This week&apos;s focus</p>
-          <h2 className="text-xl font-medium text-[var(--primary)] leading-relaxed">
-            &quot;{action}&quot;
-          </h2>
-        </div>
-
         <div className="space-y-4">
           {CHECKIN_CATEGORIES.map((cat) => {
             const state = alignment[cat.id];
@@ -99,8 +92,10 @@ export default async function ResultsPage() {
             const userNote = userCheckins.find(c => c.category === cat.id)?.note;
             const partnerNote = partnerCheckins.find(c => c.category === cat.id)?.note;
 
+            const isFocus = weeklyFocus?.categoryId === cat.id;
+
             return (
-              <div key={cat.id} className="bg-white border border-[var(--accent)] rounded-3xl p-6 shadow-sm">
+              <div key={cat.id} className={`bg-white border ${isFocus ? 'border-[var(--primary)] shadow-md ring-1 ring-[var(--primary)]/10' : 'border-[var(--accent)] shadow-sm'} rounded-3xl p-6 transition-all`}>
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-1">{cat.name}</p>
@@ -141,6 +136,15 @@ export default async function ResultsPage() {
                   </div>
                 </div>
 
+                {isFocus && (
+                  <div className="mt-6 p-4 bg-stone-50 rounded-2xl border border-[var(--primary)]/10 animate-in fade-in slide-in-from-top-2 duration-500">
+                    <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest mb-2 font-medium">Weekly Focus Suggestion</p>
+                    <p className="text-sm text-[var(--primary)] leading-relaxed italic">
+                      &quot;{weeklyFocus.message}&quot;
+                    </p>
+                  </div>
+                )}
+
                 {(userNote || partnerNote) && (
                   <div className="mt-6 pt-4 border-t border-stone-50 space-y-3">
                     {userNote && (
@@ -167,6 +171,16 @@ export default async function ResultsPage() {
             );
           })}
         </div>
+
+        <div className="pt-8 text-center">
+          <p className="text-xs text-[var(--muted)] leading-relaxed max-w-xs mx-auto">
+            Results are meant to start a conversation, not to judge. Take a moment to listen to each other.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
 
         <div className="pt-8 text-center">
           <p className="text-xs text-[var(--muted)] leading-relaxed max-w-xs mx-auto">

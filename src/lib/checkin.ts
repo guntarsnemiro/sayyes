@@ -40,12 +40,12 @@ export function getWeekDate() {
   return monday.toISOString().split('T')[0];
 }
 
-export const ACTION_SUGGESTIONS: Record<string, string> = {
-  emotional: "Share one thing you appreciated about your partner this week.",
-  intimacy: "Dedicate 15 minutes to distraction-free physical connection or conversation.",
-  money: "Set aside 10 minutes to discuss one financial goal or concern calmly.",
-  logistics: "Review next week's schedule together and ask 'How can I help you most?'.",
-  respect: "Practice active listening: let your partner speak for 3 minutes without interrupting."
+export const CONVERSATION_STARTERS: Record<string, string> = {
+  emotional: "Ask this: 'What is one thing I could do this week to make your load feel 10% lighter?'",
+  intimacy: "The 30-Second Rule: Try a 30-second hug today. No agenda, no talking—just a moment of physical presence.",
+  money: "Small wins: Instead of a big budget talk, share one small thing you both spent money on this week that actually brought you joy.",
+  logistics: "Sync up: Take 10 minutes tonight to look at next week's calendar together. Who's doing what?",
+  respect: "Pride point: Tell your partner one thing they did this week (even something small) that made you feel proud to be with them."
 };
 
 export type AlignmentState = 'aligned' | 'partially-aligned' | 'misaligned';
@@ -57,14 +57,42 @@ export function getAlignmentState(score1: number, score2: number): AlignmentStat
   return 'misaligned';
 }
 
-export function getPrimaryAction(alignment: Record<string, AlignmentState>) {
-  const misaligned = CHECKIN_CATEGORIES.find(cat => alignment[cat.id] === 'misaligned');
-  if (misaligned) return ACTION_SUGGESTIONS[misaligned.id];
+export function getWeeklyFocus(userMap: Record<string, number>, partnerMap: Record<string, number>) {
+  // 1. Check for Gaps (Difference >= 2)
+  const gapCategories = CHECKIN_CATEGORIES.filter(cat => {
+    const score1 = userMap[cat.id] || 0;
+    const score2 = partnerMap[cat.id] || 0;
+    return Math.abs(score1 - score2) >= 2;
+  });
 
-  const partially = CHECKIN_CATEGORIES.find(cat => alignment[cat.id] === 'partially-aligned');
-  if (partially) return ACTION_SUGGESTIONS[partially.id];
+  if (gapCategories.length > 0) {
+    // Return the one with the biggest gap, or just the first one
+    const focus = gapCategories.sort((a, b) => {
+      const diffA = Math.abs((userMap[a.id] || 0) - (partnerMap[a.id] || 0));
+      const diffB = Math.abs((userMap[b.id] || 0) - (partnerMap[b.id] || 0));
+      return diffB - diffA;
+    })[0];
+    return { categoryId: focus.id, message: CONVERSATION_STARTERS[focus.id] };
+  }
 
-  return "You are perfectly aligned this week. Enjoy the connection!";
+  // 2. Check for Low Floor (Total < 7)
+  const lowFloorCategories = CHECKIN_CATEGORIES.filter(cat => {
+    const score1 = userMap[cat.id] || 0;
+    const score2 = partnerMap[cat.id] || 0;
+    return (score1 + score2) < 7 && score1 > 0 && score2 > 0;
+  });
+
+  if (lowFloorCategories.length > 0) {
+    // Return the one with the lowest total
+    const focus = lowFloorCategories.sort((a, b) => {
+      const totalA = (userMap[a.id] || 0) + (partnerMap[a.id] || 0);
+      const totalB = (userMap[b.id] || 0) + (partnerMap[b.id] || 0);
+      return totalA - totalB;
+    })[0];
+    return { categoryId: focus.id, message: CONVERSATION_STARTERS[focus.id] };
+  }
+
+  return null;
 }
 
 export function calculateAlignment(answers1: Record<string, number>, answers2: Record<string, number>) {
