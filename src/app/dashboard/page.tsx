@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/auth/session';
-import { getWeekDate, calculateWeeklyScore, calculateAverageScore } from '@/lib/checkin';
+import { getWeekDate, calculateWeeklyScore, calculateAverageScore, getWeeklyFocus, CHECKIN_CATEGORIES } from '@/lib/checkin';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -86,6 +86,8 @@ export default async function DashboardPage() {
   let partner = null;
   let userDone = false;
   let partnerDone = false;
+  let weeklyFocus = null;
+  let focusCategory = null;
 
   if (currentUser.couple_id) {
     partner = await db.prepare(
@@ -93,18 +95,29 @@ export default async function DashboardPage() {
     ).bind(currentUser.couple_id, currentUser.id).first<{ name: string, email: string }>();
 
     const checkinsRes = await db.prepare(`
-      SELECT user_id, COUNT(DISTINCT category) as count 
+      SELECT user_id, category, score 
       FROM checkins 
-      WHERE couple_id = ? AND week_date = ? 
-      GROUP BY user_id
-    `).bind(currentUser.couple_id, weekDate).all<{ user_id: string, count: number }>();
+      WHERE couple_id = ? AND week_date = ?
+    `).bind(currentUser.couple_id, weekDate).all<{ user_id: string, category: string, score: number }>();
 
     const checkins = checkinsRes.results || [];
-    const userCheckin = checkins.find(c => c.user_id === currentUser.id);
-    const partnerCheckin = checkins.find(c => c.user_id !== currentUser.id);
+    const userCheckins = checkins.filter(c => c.user_id === currentUser.id);
+    const partnerCheckins = checkins.filter(c => c.user_id !== currentUser.id);
 
-    userDone = (userCheckin?.count || 0) >= 5;
-    partnerDone = (partnerCheckin?.count || 0) >= 5;
+    userDone = userCheckins.length >= 5;
+    partnerDone = partnerCheckins.length >= 5;
+
+    if (userDone && partnerDone) {
+      const userMap: Record<string, number> = {};
+      userCheckins.forEach(c => userMap[c.category] = c.score);
+      const partnerMap: Record<string, number> = {};
+      partnerCheckins.forEach(c => partnerMap[c.category] = c.score);
+      
+      weeklyFocus = getWeeklyFocus(userMap, partnerMap);
+      if (weeklyFocus) {
+        focusCategory = CHECKIN_CATEGORIES.find(c => c.id === weeklyFocus.categoryId);
+      }
+    }
   }
 
   // FETCH HISTORY FOR GRAPH & AVERAGES
@@ -247,6 +260,18 @@ export default async function DashboardPage() {
                 </h3>
                 <p className="text-sm text-[var(--muted)]">
                   Take a second to tell them, or just hold it in your mind.
+                </p>
+              </div>
+            )}
+
+            {userDone && partnerDone && weeklyFocus && focusCategory && (
+              <div className="bg-white border border-[var(--primary)] shadow-sm rounded-3xl p-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-2 h-2 rounded-full bg-[var(--primary)]" />
+                  <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest font-medium">Weekly Focus: {focusCategory.name}</p>
+                </div>
+                <p className="text-sm text-[var(--primary)] leading-relaxed italic">
+                  &quot;{weeklyFocus.message}&quot;
                 </p>
               </div>
             )}
