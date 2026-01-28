@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     const context = getRequestContext();
     const env = context.env as CloudflareEnv;
