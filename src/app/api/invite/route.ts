@@ -58,10 +58,12 @@ export async function POST(request: NextRequest) {
               <p style="font-size: 16px; line-height: 1.5; margin-bottom: 32px;">
                 ${user.name || user.email} has invited you to join them in a private, weekly connection space.
               </p>
-              <a href="${inviteLink}" style="display: inline-block; background-color: #44403c; color: #ffffff; padding: 12px 32px; border-radius: 9999px; text-decoration: none; font-weight: 500;">
-                Join your partner
-              </a>
-              <p style="font-size: 12px; color: #a8a29e; margin-top: 40px; border-top: 1px solid #e5e5e5; pt: 20px;">
+              <div style="text-align: center;">
+                <a href="${inviteLink}" style="display: inline-block; background-color: #44403c; color: #ffffff; padding: 12px 32px; border-radius: 9999px; text-decoration: none; font-weight: 500;">
+                  Join your partner
+                </a>
+              </div>
+              <p style="font-size: 12px; color: #a8a29e; margin-top: 40px; border-top: 1px solid #e5e5e5; padding-top: 20px;">
                 SayYes — A weekly connection for couples.<br>
                 You are receiving this because your partner invited you.
               </p>
@@ -69,6 +71,11 @@ export async function POST(request: NextRequest) {
           `,
         }),
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Resend Invite Error:', errorData);
+      }
     }
 
     return NextResponse.json({ success: true });

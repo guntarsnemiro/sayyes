@@ -4,6 +4,7 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import InstallPrompt from './InstallPrompt';
+import CopyInviteButton from './CopyInviteButton';
 
 export const runtime = 'edge';
 
@@ -87,6 +88,7 @@ export default async function DashboardPage() {
   let partner = null;
   let userDone = false;
   let partnerDone = false;
+  let pendingInvite: { id: string, invitee_email: string } | null = null;
   let weeklyFocus: { categoryId: string; message: string } | null = null;
   let focusCategory: typeof CHECKIN_CATEGORIES[0] | null | undefined = null;
 
@@ -119,6 +121,13 @@ export default async function DashboardPage() {
         focusCategory = CHECKIN_CATEGORIES.find(c => c.id === weeklyFocus?.categoryId);
       }
     }
+  } else {
+    // Check for pending invitations sent by this user
+    pendingInvite = await db.prepare(`
+      SELECT id, invitee_email FROM invitations 
+      WHERE inviter_id = ? AND status = 'pending' 
+      ORDER BY created_at DESC LIMIT 1
+    `).bind(currentUser.id).first<{ id: string, invitee_email: string }>();
   }
 
   // FETCH HISTORY FOR GRAPH & AVERAGES
@@ -218,6 +227,17 @@ export default async function DashboardPage() {
             >
               Invite Partner
             </Link>
+
+            {pendingInvite && (
+              <div className="mt-8 pt-8 border-t border-stone-100">
+                <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest mb-2">Pending Invitation</p>
+                <p className="text-xs text-[var(--primary)] font-medium">{pendingInvite.invitee_email}</p>
+                <p className="text-[10px] text-[var(--muted)] mt-1 px-4 leading-relaxed">
+                  If the email didn&apos;t arrive, you can copy the link below and send it manually.
+                </p>
+                <CopyInviteButton inviteId={pendingInvite.id} />
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-4">

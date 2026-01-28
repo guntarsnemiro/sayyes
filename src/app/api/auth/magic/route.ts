@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
               <a href="${magicLink}" style="display: inline-block; background-color: #44403c; color: #ffffff; padding: 12px 32px; border-radius: 9999px; text-decoration: none; font-weight: 500;">
                 Sign In
               </a>
-              <p style="font-size: 12px; color: #a8a29e; margin-top: 40px; border-top: 1px solid #e5e5e5; pt: 20px;">
+              <p style="font-size: 12px; color: #a8a29e; margin-top: 40px; border-top: 1px solid #e5e5e5; padding-top: 20px;">
                 SayYes — A weekly connection for couples.<br>
                 If you didn't request this email, you can safely ignore it.
               </p>
