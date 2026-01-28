@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import PWARegistration from "./PWARegistration";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,6 +16,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SayYes — A weekly connection for couples who choose to stay together",
   description: "SayYes is a calm, weekly relationship check-in for couples who want to stay together. Not therapy. No pressure. Just clarity and connection.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "SayYes",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   alternates: {
     canonical: "https://sayyesapp.com/",
   },
@@ -43,6 +53,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <PWARegistration />
         {children}
       </body>
     </html>

@@ -1,5 +1,4 @@
 import { getSession } from '@/lib/auth/session';
-import { getSession } from '@/lib/auth/session';
 import { getWeekDate, CHECKIN_CATEGORIES, calculateAlignment, getWeeklyFocus, calculateCategoryAverage } from '@/lib/checkin';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { redirect } from 'next/navigation';
