@@ -3,6 +3,7 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import ProfileForm from './ProfileForm';
+import DeleteAccount from './DeleteAccount';
 
 export const runtime = 'edge';
 
@@ -40,6 +41,7 @@ export default async function ProfilePage() {
       <div className="max-w-md mx-auto w-full">
         <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm">
           <ProfileForm initialName={currentUser.name || ''} email={currentUser.email} />
+          <DeleteAccount userName={currentUser.name || ''} />
         </div>
         
         <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest leading-relaxed px-4 mt-8 text-center">
