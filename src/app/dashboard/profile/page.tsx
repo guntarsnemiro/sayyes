@@ -27,6 +27,8 @@ export default async function ProfilePage() {
     redirect('/auth/login');
   }
 
+  const isAdmin = ['guntarsnemiro@gmail.com'].includes(currentUser.email.toLowerCase());
+
   return (
     <main className="flex min-h-screen flex-col bg-[var(--background)] p-6">
       <header className="flex justify-between items-center max-w-2xl mx-auto w-full mb-12">
@@ -36,7 +38,13 @@ export default async function ProfilePage() {
         <h1 className="text-xl font-light tracking-tight text-[var(--primary)]">
           Profile Settings
         </h1>
-        <div className="w-12"></div>
+        {isAdmin ? (
+          <Link href="/admin" className="text-[10px] text-stone-400 uppercase tracking-widest hover:text-stone-600 transition-colors">
+            Admin
+          </Link>
+        ) : (
+          <div className="w-12"></div>
+        )}
       </header>
 
       <div className="max-w-md mx-auto w-full">
