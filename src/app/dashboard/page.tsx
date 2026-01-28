@@ -205,16 +205,26 @@ export default async function DashboardPage() {
                 </p>
               </div>
               {userDone && partnerDone ? (
-                <Link href="/dashboard/results/" className="bg-stone-100 text-[var(--primary)] px-5 py-2 rounded-full text-sm font-medium hover:bg-stone-200 transition-colors">
-                  View
-                </Link>
+                <div className="flex gap-2">
+                  <Link href="/checkin" className="text-[10px] text-[var(--muted)] uppercase tracking-widest hover:text-[var(--primary)] transition-colors border border-[var(--accent)] px-3 py-2 rounded-full flex items-center">
+                    Edit
+                  </Link>
+                  <Link href="/dashboard/results/" className="bg-stone-100 text-[var(--primary)] px-5 py-2 rounded-full text-sm font-medium hover:bg-stone-200 transition-colors">
+                    View
+                  </Link>
+                </div>
               ) : !userDone ? (
                 <Link href="/checkin" className="bg-stone-100 text-[var(--primary)] px-5 py-2 rounded-full text-sm font-medium hover:bg-stone-200 transition-colors">
                   Start
                 </Link>
               ) : (
-                <div className="bg-stone-50 text-[var(--muted)] px-5 py-2 rounded-full text-sm font-medium">
-                  Done
+                <div className="flex gap-2 items-center">
+                  <Link href="/checkin" className="text-[10px] text-[var(--muted)] uppercase tracking-widest hover:text-[var(--primary)] transition-colors border border-[var(--accent)] px-3 py-2 rounded-full">
+                    Edit
+                  </Link>
+                  <div className="bg-stone-50 text-[var(--muted)] px-5 py-2 rounded-full text-sm font-medium">
+                    Done
+                  </div>
                 </div>
               )}
             </div>

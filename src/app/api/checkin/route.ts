@@ -22,7 +22,12 @@ export async function POST(request: NextRequest) {
 
     const weekDate = getWeekDate();
 
-    // Insert each category checkin
+    // 1. Clear any existing checkins for this user/week to allow editing
+    await db.prepare('DELETE FROM checkins WHERE user_id = ? AND week_date = ?')
+      .bind(user.id, weekDate)
+      .run();
+
+    // 2. Insert each category checkin
     const statements = Object.entries(answers).map(([category, data]) => {
       return db.prepare(`
         INSERT INTO checkins (user_id, couple_id, week_date, category, score, note)

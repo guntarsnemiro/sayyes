@@ -79,7 +79,12 @@ export default async function ResultsPage() {
         <h1 className="text-xl font-light tracking-tight text-[var(--primary)]">
           Weekly Results
         </h1>
-        <div className="w-12"></div>
+        <Link 
+          href="/checkin" 
+          className="text-[10px] text-[var(--muted)] uppercase tracking-widest hover:text-[var(--primary)] transition-colors border border-[var(--accent)] px-3 py-1 rounded-full"
+        >
+          Edit
+        </Link>
       </header>
 
       <div className="max-w-2xl mx-auto w-full space-y-8 pb-12">

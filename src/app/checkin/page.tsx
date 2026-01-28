@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CHECKIN_CATEGORIES } from '@/lib/checkin';
 import Link from 'next/link';
@@ -9,7 +9,27 @@ export default function CheckinPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, { score: number, note: string }>>({});
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    async function loadExisting() {
+      try {
+        const res = await fetch('/api/checkin/current');
+        if (res.ok) {
+          const data = await res.json() as { answers: Record<string, { score: number, note: string }> };
+          if (data.answers) {
+            setAnswers(data.answers);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load existing answers', err);
+      } finally {
+        setInitializing(false);
+      }
+    }
+    loadExisting();
+  }, []);
 
   const currentCategory = CHECKIN_CATEGORIES[currentStep];
 
@@ -58,6 +78,16 @@ export default function CheckinPage() {
   };
 
   const isCurrentStepAnswered = !!answers[currentCategory.id]?.score;
+
+  if (initializing) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[var(--background)]">
+        <div className="animate-pulse text-[var(--muted)] uppercase tracking-widest text-xs">
+          Loading...
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[var(--background)]">
