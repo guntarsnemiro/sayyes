@@ -7,6 +7,7 @@ interface Stats {
   users: number;
   couples: number;
   checkins: number;
+  feedback: number;
 }
 
 interface User {
@@ -22,8 +23,21 @@ interface Invite {
   created_at: string;
 }
 
+interface Feedback {
+  type: string;
+  message: string;
+  created_at: string;
+  email: string;
+  name: string | null;
+}
+
 export default function AdminDashboard() {
-  const [data, setData] = useState<{ stats: Stats, latestUsers: User[], latestInvites: Invite[] } | null>(null);
+  const [data, setData] = useState<{ 
+    stats: Stats, 
+    latestUsers: User[], 
+    latestInvites: Invite[],
+    latestFeedback: Feedback[]
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,6 +96,44 @@ export default function AdminDashboard() {
           <div className="bg-white border border-stone-200 rounded-3xl p-8 shadow-sm">
             <p className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">Check-ins Done</p>
             <p className="text-4xl font-light text-[#44403c]">{data?.stats.checkins}</p>
+          </div>
+          <div className="bg-white border border-stone-200 rounded-3xl p-8 shadow-sm">
+            <p className="text-[10px] text-stone-400 uppercase tracking-widest mb-1">Beta Feedback</p>
+            <p className="text-4xl font-light text-[#44403c]">{data?.stats.feedback}</p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <h2 className="text-sm uppercase tracking-widest text-stone-400 font-medium px-2">Recent Beta Feedback</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {data?.latestFeedback.map((f, i) => (
+              <div key={i} className="bg-white border border-stone-200 rounded-[2rem] p-6 shadow-sm flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start">
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full border uppercase tracking-widest font-medium ${
+                      f.type === 'bug' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                      f.type === 'idea' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                      'bg-green-50 text-green-600 border-green-100'
+                    }`}>
+                      {f.type}
+                    </span>
+                    <span className="text-[10px] text-stone-400">
+                      {new Date(f.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#44403c] leading-relaxed italic">&quot;{f.message}&quot;</p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-stone-50">
+                  <p className="text-[10px] font-medium text-stone-500">{f.name || 'Anonymous'}</p>
+                  <p className="text-[9px] text-stone-400 lowercase">{f.email}</p>
+                </div>
+              </div>
+            ))}
+            {data?.latestFeedback.length === 0 && (
+              <div className="col-span-full bg-stone-100/50 border border-dashed border-stone-200 rounded-[2rem] p-12 text-center">
+                <p className="text-xs text-stone-400 uppercase tracking-widest">No feedback received yet</p>
+              </div>
+            )}
           </div>
         </div>
 

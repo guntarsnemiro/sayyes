@@ -21,6 +21,7 @@ export async function GET() {
     const userCount = await db.prepare('SELECT COUNT(*) as count FROM users').first<{ count: number }>();
     const coupleCount = await db.prepare('SELECT COUNT(*) as count FROM couples').first<{ count: number }>();
     const checkinCount = await db.prepare('SELECT COUNT(*) as count FROM checkins').first<{ count: number }>();
+    const feedbackCount = await db.prepare('SELECT COUNT(*) as count FROM feedback').first<{ count: number }>();
 
     // 2. Get Latest Users
     const latestUsers = await db.prepare(`
@@ -38,14 +39,25 @@ export async function GET() {
       LIMIT 10
     `).all<{ invitee_email: string, status: string, created_at: string }>();
 
+    // 4. Get Latest Feedback
+    const latestFeedback = await db.prepare(`
+      SELECT f.type, f.message, f.created_at, u.email, u.name
+      FROM feedback f
+      JOIN users u ON f.user_id = u.id
+      ORDER BY f.created_at DESC
+      LIMIT 20
+    `).all<{ type: string, message: string, created_at: string, email: string, name: string | null }>();
+
     return NextResponse.json({
       stats: {
         users: userCount?.count || 0,
         couples: coupleCount?.count || 0,
-        checkins: checkinCount?.count || 0
+        checkins: checkinCount?.count || 0,
+        feedback: feedbackCount?.count || 0
       },
       latestUsers: latestUsers.results,
-      latestInvites: latestInvites.results
+      latestInvites: latestInvites.results,
+      latestFeedback: latestFeedback.results
     });
   } catch (err) {
     console.error('Admin stats error:', err);

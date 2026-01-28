@@ -5,6 +5,7 @@ import Link from 'next/link';
 import ProfileForm from './ProfileForm';
 import DeleteAccount from './DeleteAccount';
 import PushSettings from './PushSettings';
+import FeedbackForm from './FeedbackForm';
 
 export const runtime = 'edge';
 
@@ -51,6 +52,7 @@ export default async function ProfilePage() {
         <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm">
           <ProfileForm initialName={currentUser.name || ''} email={currentUser.email} />
           <PushSettings />
+          <FeedbackForm />
           <DeleteAccount userName={currentUser.name || ''} />
         </div>
         
