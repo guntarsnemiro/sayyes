@@ -33,7 +33,7 @@ export default function AdminDashboard() {
         if (!res.ok) throw new Error('Unauthorized or failed to fetch');
         return res.json();
       })
-      .then(setData)
+      .then((json: any) => setData(json))
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
