@@ -91,14 +91,6 @@ export default async function ResultsPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="flex justify-between px-6 text-[10px] text-[var(--muted)] uppercase tracking-widest">
-            <span>Category</span>
-            <div className="flex gap-4">
-              <span>{userName}</span>
-              <span>{partnerName}</span>
-            </div>
-          </div>
-          
           {CHECKIN_CATEGORIES.map((cat) => {
             const state = alignment[cat.id];
             const userScore = userMap[cat.id];
@@ -123,20 +115,29 @@ export default async function ResultsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 pt-2">
-                  <div className="flex-grow h-2 bg-stone-100 rounded-full overflow-hidden flex">
-                    <div 
-                      className="h-full bg-[var(--primary)] opacity-30" 
-                      style={{ width: `${(Math.min(userScore, partnerScore) / 5) * 100}%` }}
-                    />
-                    <div 
-                      className="h-full bg-[var(--primary)]" 
-                      style={{ width: `${(Math.abs(userScore - partnerScore) / 5) * 100}%` }}
-                    />
+                <div className="space-y-3 pt-2">
+                  {/* User Bar */}
+                  <div className="flex items-center gap-4">
+                    <span className="text-[10px] text-[var(--muted)] uppercase tracking-widest w-16">{userName}</span>
+                    <div className="flex-grow h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-[var(--primary)]" 
+                        style={{ width: `${(userScore / 5) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-[var(--primary)] w-4 text-right">{userScore}</span>
                   </div>
-                  <div className="flex gap-4 text-xs font-medium text-[var(--primary)]">
-                    <span className={userScore < partnerScore ? 'opacity-50' : ''}>{userScore}</span>
-                    <span className={partnerScore < userScore ? 'opacity-50' : ''}>{partnerScore}</span>
+
+                  {/* Partner Bar */}
+                  <div className="flex items-center gap-4">
+                    <span className="text-[10px] text-[var(--muted)] uppercase tracking-widest w-16">{partnerName}</span>
+                    <div className="flex-grow h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-[var(--primary)] opacity-60" 
+                        style={{ width: `${(partnerScore / 5) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-[var(--primary)] w-4 text-right">{partnerScore}</span>
                   </div>
                 </div>
 
