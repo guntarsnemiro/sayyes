@@ -1,5 +1,6 @@
 import { getSession } from '@/lib/auth/session';
 import { getWeekDate } from '@/lib/checkin';
+import { sendPushNotification } from '@/lib/push';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -36,6 +37,29 @@ export async function POST(request: NextRequest) {
     });
 
     await db.batch(statements);
+
+    // 3. TRIGGER PUSH NOTIFICATION TO PARTNER
+    try {
+      // Find partner's subscriptions
+      const partnerSubs = await db.prepare(`
+        SELECT subscription_json FROM push_subscriptions 
+        WHERE user_id = (SELECT id FROM users WHERE couple_id = ? AND id != ? LIMIT 1)
+      `).bind(user.couple_id, user.id).all<{ subscription_json: string }>();
+
+      if (partnerSubs.results && partnerSubs.results.length > 0) {
+        const userName = user.name?.split(' ')[0] || 'Your partner';
+        const title = 'Check-in Finished! ✨';
+        const body = `${userName} has completed their check-in.`;
+        
+        // Send to all partner devices
+        const pushPromises = partnerSubs.results.map(sub => 
+          sendPushNotification(sub.subscription_json, title, body, '/dashboard')
+        );
+        await Promise.all(pushPromises);
+      }
+    } catch (pushErr) {
+      console.error('Push notification failed but check-in saved:', pushErr);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {
