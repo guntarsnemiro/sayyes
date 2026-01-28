@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const resendApiKey = env.RESEND_API_KEY;
 
     if (resendApiKey) {
-      await fetch('https://api.resend.com/emails', {
+      const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${resendApiKey}`,

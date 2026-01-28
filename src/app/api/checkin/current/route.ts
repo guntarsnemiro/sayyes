@@ -1,7 +1,7 @@
 import { getSession } from '@/lib/auth/session';
 import { getWeekDate } from '@/lib/checkin';
 import { getRequestContext } from '@cloudflare/next-on-pages';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
