@@ -3,6 +3,7 @@ import { getWeekDate, calculateWeeklyScore, calculateAverageScore, getWeeklyFocu
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import InstallPrompt from './InstallPrompt';
 
 export const runtime = 'edge';
 
@@ -200,6 +201,8 @@ export default async function DashboardPage() {
              "Your weekly connection space is ready."}
           </p>
         </div>
+
+        <InstallPrompt />
 
         {!currentUser.couple_id ? (
           <div className="bg-stone-50 border border-dashed border-[var(--accent)] rounded-3xl p-8 text-center shadow-sm">

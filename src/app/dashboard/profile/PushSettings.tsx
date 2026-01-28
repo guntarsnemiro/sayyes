@@ -70,6 +70,26 @@ export default function PushSettings() {
     }
   }
 
+  async function unsubscribe() {
+    if (!subscription) return;
+    setLoading(true);
+    try {
+      await fetch('/api/push/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription })
+      });
+
+      await subscription.unsubscribe();
+      setSubscription(null);
+      setStatus('default');
+    } catch (err) {
+      console.error('Failed to unsubscribe:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (!isSupported) return null;
 
   return (
@@ -90,9 +110,18 @@ export default function PushSettings() {
           Notifications are blocked in your browser settings. To receive alerts, please reset the site permissions in your browser bar.
         </p>
       ) : subscription ? (
-        <p className="text-[10px] text-[var(--muted)] leading-relaxed text-center px-4 italic">
-          Notifications are enabled. You will receive alerts for new check-ins and results.
-        </p>
+        <div className="space-y-4 text-center px-4">
+          <p className="text-[10px] text-[var(--muted)] leading-relaxed italic">
+            Notifications are enabled. You will receive alerts for new check-ins and results.
+          </p>
+          <button
+            onClick={unsubscribe}
+            disabled={loading}
+            className="text-[10px] text-rose-400 hover:text-rose-600 transition-colors uppercase tracking-widest font-medium"
+          >
+            {loading ? 'Disabling...' : 'Disable Notifications'}
+          </button>
+        </div>
       ) : (
         <div className="space-y-4">
           <p className="text-[10px] text-[var(--muted)] leading-relaxed">
