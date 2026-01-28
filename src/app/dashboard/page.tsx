@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/auth/session';
-import { getWeekDate, calculateWeeklyScore } from '@/lib/checkin';
+import { getWeekDate, calculateWeeklyScore, calculateAverageScore } from '@/lib/checkin';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -107,8 +107,10 @@ export default async function DashboardPage() {
     partnerDone = (partnerCheckin?.count || 0) >= 5;
   }
 
-  // FETCH HISTORY FOR GRAPH
-  let history: { week: string, score: number }[] = [];
+  // FETCH HISTORY FOR GRAPH & AVERAGES
+  let history: { week: string, score: number, average: number }[] = [];
+  let eightWeekAvg = 0;
+  
   if (currentUser.couple_id) {
     const allCheckins = await db.prepare(`
       SELECT week_date, user_id, category, score 
@@ -128,17 +130,25 @@ export default async function DashboardPage() {
     history = Object.entries(byWeek)
       .map(([week, data]: [string, any]) => {
         const score = calculateWeeklyScore(data.user, data.partner);
-        return { week, score };
+        const average = calculateAverageScore(data.user, data.partner);
+        return { week, score, average };
       })
       .filter(h => h.score > 0)
       .sort((a, b) => a.week.localeCompare(b.week))
       .slice(-8); // Last 8 weeks
+
+    if (history.length > 0) {
+      const sum = history.reduce((acc, h) => acc + h.average, 0);
+      eightWeekAvg = Math.round((sum / history.length) * 10) / 10;
+    }
   }
 
   const userFirstName = (currentUser.name || currentUser.email || 'You').split(' ')[0].split('@')[0];
   const partnerFirstName = partner 
     ? (partner.name || partner.email || 'partner').split(' ')[0].split('@')[0]
     : 'your partner';
+
+  const currentWeekAvg = history.length > 0 ? history[history.length - 1].average : 0;
 
   return (
     <main className="flex min-h-screen flex-col bg-[var(--background)] p-6">
@@ -250,7 +260,18 @@ export default async function DashboardPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-light text-[var(--primary)]">{history[history.length-1].score}%</p>
-                    <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest">Current</p>
+                    <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest">Alignment</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-8 py-4 border-y border-stone-50">
+                  <div className="text-center border-r border-stone-50">
+                    <p className="text-xl font-light text-[var(--primary)]">{currentWeekAvg.toFixed(1)}</p>
+                    <p className="text-[9px] text-[var(--muted)] uppercase tracking-widest mt-1">This Week Avg</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-light text-[var(--primary)]">{eightWeekAvg.toFixed(1)}</p>
+                    <p className="text-[9px] text-[var(--muted)] uppercase tracking-widest mt-1">8-Week Avg</p>
                   </div>
                 </div>
                 

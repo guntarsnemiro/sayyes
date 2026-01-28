@@ -1,5 +1,6 @@
 import { getSession } from '@/lib/auth/session';
-import { getWeekDate, CHECKIN_CATEGORIES, calculateAlignment, getWeeklyFocus } from '@/lib/checkin';
+import { getSession } from '@/lib/auth/session';
+import { getWeekDate, CHECKIN_CATEGORIES, calculateAlignment, getWeeklyFocus, calculateCategoryAverage } from '@/lib/checkin';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -62,6 +63,40 @@ export default async function ResultsPage() {
   const alignment = calculateAlignment(userMap, partnerMap);
   const weeklyFocus = getWeeklyFocus(userMap, partnerMap);
 
+  // FETCH 8-WEEK HISTORY FOR CATEGORY AVERAGES
+  const allHistoryCheckins = await db.prepare(`
+    SELECT week_date, user_id, category, score 
+    FROM checkins 
+    WHERE couple_id = ? 
+    ORDER BY week_date DESC 
+    LIMIT 100
+  `).bind(currentUser.couple_id).all<{ week_date: string, user_id: string, category: string, score: number }>();
+
+  const byWeek: Record<string, any> = {};
+  allHistoryCheckins.results?.forEach(c => {
+    if (!byWeek[c.week_date]) byWeek[c.week_date] = { user: {}, partner: {} };
+    const role = c.user_id === currentUser.id ? 'user' : 'partner';
+    byWeek[c.week_date][role][c.category] = c.score;
+  });
+
+  const historyWeeks = Object.keys(byWeek).sort().slice(-8);
+  const categoryEightWeekAvgs: Record<string, number> = {};
+
+  CHECKIN_CATEGORIES.forEach(cat => {
+    let sum = 0;
+    let count = 0;
+    historyWeeks.forEach(week => {
+      const weekData = byWeek[week];
+      const s1 = weekData.user[cat.id];
+      const s2 = weekData.partner[cat.id];
+      if (s1 !== undefined || s2 !== undefined) {
+        sum += calculateCategoryAverage(s1, s2);
+        count++;
+      }
+    });
+    categoryEightWeekAvgs[cat.id] = count > 0 ? Math.round((sum / count) * 10) / 10 : 0;
+  });
+
   // Fetch partner info for the UI
   const partner = await db.prepare(
     'SELECT name, email FROM users WHERE couple_id = ? AND id != ?'
@@ -93,6 +128,8 @@ export default async function ResultsPage() {
             const state = alignment[cat.id];
             const userScore = userMap[cat.id];
             const partnerScore = partnerMap[cat.id];
+            const thisWeekAvg = calculateCategoryAverage(userScore, partnerScore);
+            const eightWeekAvg = categoryEightWeekAvgs[cat.id];
             
             const userNote = userCheckins.find(c => c.category === cat.id)?.note;
             const partnerNote = partnerCheckins.find(c => c.category === cat.id)?.note;
@@ -112,6 +149,17 @@ export default async function ResultsPage() {
                     'bg-rose-50 text-rose-700 border border-rose-100'
                   }`}>
                     {state.replace('-', ' ')}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-6 py-3 border-y border-stone-50">
+                  <div className="text-center border-r border-stone-50">
+                    <p className="text-lg font-light text-[var(--primary)]">{thisWeekAvg.toFixed(1)}</p>
+                    <p className="text-[8px] text-[var(--muted)] uppercase tracking-widest">This Week Avg</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-lg font-light text-[var(--primary)]">{eightWeekAvg.toFixed(1)}</p>
+                    <p className="text-[8px] text-[var(--muted)] uppercase tracking-widest">8-Week Avg</p>
                   </div>
                 </div>
 

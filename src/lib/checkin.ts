@@ -122,3 +122,30 @@ export function calculateWeeklyScore(answers1: Record<string, number>, answers2:
   const score = Math.round(((maxDiff - totalDiff) / maxDiff) * 100);
   return Math.max(0, score);
 }
+
+export function calculateAverageScore(answers1: Record<string, number>, answers2: Record<string, number>): number {
+  let totalScore = 0;
+  let count = 0;
+
+  for (const cat of CHECKIN_CATEGORIES) {
+    if (answers1[cat.id] !== undefined) {
+      totalScore += answers1[cat.id];
+      count++;
+    }
+    if (answers2[cat.id] !== undefined) {
+      totalScore += answers2[cat.id];
+      count++;
+    }
+  }
+
+  if (count === 0) return 0;
+  return Math.round((totalScore / count) * 10) / 10;
+}
+
+export function calculateCategoryAverage(score1?: number, score2?: number): number {
+  if (score1 === undefined && score2 === undefined) return 0;
+  const s1 = score1 || 0;
+  const s2 = score2 || 0;
+  const count = (score1 !== undefined ? 1 : 0) + (score2 !== undefined ? 1 : 0);
+  return Math.round(((s1 + s2) / count) * 10) / 10;
+}
