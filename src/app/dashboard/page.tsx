@@ -29,6 +29,7 @@ export default async function DashboardPage() {
   }>();
   
   const currentUser = freshUser || user;
+  const isAdmin = ['guntarsnemiro@gmail.com'].includes(currentUser.email.toLowerCase());
 
   // 1. AUTO-REPAIR: Ensure all accounts with this email are synced to the same couple
   let activeCoupleId = currentUser.couple_id;
@@ -176,9 +177,16 @@ export default async function DashboardPage() {
   return (
     <main className="flex min-h-screen flex-col bg-[var(--background)] p-6">
       <header className="flex justify-between items-center max-w-2xl mx-auto w-full mb-12">
-        <h1 className="text-xl font-light tracking-tight text-[var(--primary)]">
-          SayYes
-        </h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-xl font-light tracking-tight text-[var(--primary)]">
+            SayYes
+          </h1>
+          {isAdmin && (
+            <Link href="/admin" className="text-[10px] text-stone-400 uppercase tracking-[0.2em] hover:text-stone-600 transition-colors pt-1">
+              Admin
+            </Link>
+          )}
+        </div>
         <form action="/api/auth/logout" method="POST">
           <button type="submit" className="text-xs text-[var(--muted)] uppercase tracking-widest hover:text-[var(--primary)] transition-colors">
             Sign Out

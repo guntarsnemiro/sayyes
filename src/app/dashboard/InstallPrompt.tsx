@@ -9,6 +9,17 @@ export default function InstallPrompt() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // Check if dismissed in last 7 days
+    const lastDismissed = localStorage.getItem('install_prompt_dismissed');
+    if (lastDismissed) {
+      const dismissedDate = new Date(parseInt(lastDismissed));
+      const now = new Date();
+      const diffDays = Math.floor((now.getTime() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays < 7) {
+        return;
+      }
+    }
+
     // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
       setIsStandalone(true);
@@ -38,6 +49,11 @@ export default function InstallPrompt() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, [isStandalone]);
 
+  const handleDismiss = () => {
+    setIsVisible(false);
+    localStorage.setItem('install_prompt_dismissed', Date.now().toString());
+  };
+
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
@@ -62,7 +78,7 @@ export default function InstallPrompt() {
           </p>
         </div>
         <button 
-          onClick={() => setIsVisible(false)}
+          onClick={handleDismiss}
           className="text-white opacity-50 hover:opacity-100 p-1"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
