@@ -86,8 +86,8 @@ export default async function DashboardPage() {
   let partner = null;
   let userDone = false;
   let partnerDone = false;
-  let weeklyFocus = null;
-  let focusCategory = null;
+  let weeklyFocus: { categoryId: string; message: string } | null = null;
+  let focusCategory: typeof CHECKIN_CATEGORIES[0] | null = null;
 
   if (currentUser.couple_id) {
     partner = await db.prepare(
