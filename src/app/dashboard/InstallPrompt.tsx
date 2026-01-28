@@ -33,6 +33,17 @@ export default function InstallPrompt() {
 
     // Listen for Android install prompt
     const handler = (e: any) => {
+      // Don't show if already dismissed in last 7 days
+      const lastDismissed = localStorage.getItem('install_prompt_dismissed');
+      if (lastDismissed) {
+        const dismissedDate = new Date(parseInt(lastDismissed));
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays < 7) {
+          return;
+        }
+      }
+
       e.preventDefault();
       setDeferredPrompt(e);
       setIsVisible(true);

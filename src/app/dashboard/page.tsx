@@ -102,14 +102,18 @@ export default async function DashboardPage() {
       SELECT user_id, category, score 
       FROM checkins 
       WHERE couple_id = ? AND week_date = ?
-    `).bind(currentUser.couple_id, weekDate).all<{ user_id: string, category: string, score: number }>();
+    `).bind(activeCoupleId, weekDate).all<{ user_id: string, category: string, score: number }>();
 
     const checkins = checkinsRes.results || [];
     const userCheckins = checkins.filter(c => c.user_id === currentUser.id);
     const partnerCheckins = checkins.filter(c => c.user_id !== currentUser.id);
 
-    userDone = userCheckins.length >= 5;
-    partnerDone = partnerCheckins.length >= 5;
+    // FIXED: Ensure we count unique categories to confirm check-in is truly complete
+    const uniqueUserCategories = new Set(userCheckins.map(c => c.category));
+    const uniquePartnerCategories = new Set(partnerCheckins.map(c => c.category));
+
+    userDone = uniqueUserCategories.size >= 5;
+    partnerDone = uniquePartnerCategories.size >= 5;
 
     if (userDone && partnerDone) {
       const userMap: Record<string, number> = {};
@@ -135,14 +139,14 @@ export default async function DashboardPage() {
   let history: { week: string, score: number, average: number }[] = [];
   let eightWeekAvg = 0;
   
-  if (currentUser.couple_id) {
+  if (activeCoupleId) {
     const allCheckins = await db.prepare(`
       SELECT week_date, user_id, category, score 
       FROM checkins 
       WHERE couple_id = ? 
       ORDER BY week_date DESC 
-      LIMIT 100
-    `).bind(currentUser.couple_id).all<{ week_date: string, user_id: string, category: string, score: number }>();
+      LIMIT 200
+    `).bind(activeCoupleId).all<{ week_date: string, user_id: string, category: string, score: number }>();
 
     const byWeek: Record<string, any> = {};
     allCheckins.results?.forEach(c => {
@@ -157,7 +161,6 @@ export default async function DashboardPage() {
         const average = calculateAverageScore(data.user, data.partner);
         return { week, score, average };
       })
-      .filter(h => h.score > 0)
       .sort((a, b) => a.week.localeCompare(b.week))
       .slice(-8); // Last 8 weeks
 
