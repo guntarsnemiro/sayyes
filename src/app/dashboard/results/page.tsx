@@ -186,13 +186,3 @@ export default async function ResultsPage() {
     </main>
   );
 }
-
-        <div className="pt-8 text-center">
-          <p className="text-xs text-[var(--muted)] leading-relaxed max-w-xs mx-auto">
-            Results are meant to start a conversation, not to judge. Take a moment to listen to each other.
-          </p>
-        </div>
-      </div>
-    </main>
-  );
-}
