@@ -282,48 +282,92 @@ export default async function DashboardPage() {
                 </div>
               </div>
               
-              {/* The Pulse Graph Bars */}
+              {/* The Pulse Graph - Area Chart */}
               {history.length >= 1 && (
-                <div className="h-32 w-full flex items-end gap-3 px-2">
-                  {history.map((h, i) => (
-                    <div key={h.week} className="flex-grow flex flex-col items-center group relative">
-                      {/* Tooltip */}
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[var(--primary)] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 shadow-sm">
-                        {h.score}% {partner ? 'Alignment' : 'Score'}
-                      </div>
+                <div className="mt-4 relative">
+                  <div className="h-40 w-full relative">
+                    <svg viewBox="0 0 400 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
+                      <defs>
+                        <linearGradient id="pulseGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
                       
-                      {/* The Bar */}
-                      <div 
-                        className="w-full bg-stone-50 rounded-t-xl transition-all group-hover:bg-stone-100 relative overflow-hidden border-x border-t border-stone-50"
-                        style={{ height: `${Math.max(15, h.score)}%` }}
-                      >
-                        {/* Fill Color */}
-                        <div 
-                          className={`absolute bottom-0 left-0 right-0 bg-[var(--primary)] transition-all ${
-                            i === history.length - 1 ? 'opacity-60' : 'opacity-30'
-                          }`}
-                          style={{ height: '100%' }}
-                        />
-                        {/* Current Week Pulse Effect */}
-                        {i === history.length - 1 && (
-                          <div className="absolute inset-0 bg-white/20 animate-pulse" />
-                        )}
-                      </div>
+                      {/* Area Fill */}
+                      <path
+                        d={`
+                          M 0,100
+                          ${history.map((h, i) => {
+                            const x = (i / (Math.max(1, history.length - 1))) * 400;
+                            const y = 100 - h.score;
+                            return `L ${x},${y}`;
+                          }).join(' ')}
+                          L 400,100
+                          Z
+                        `}
+                        fill="url(#pulseGradient)"
+                        className="transition-all duration-1000"
+                      />
                       
-                      {/* Date Label */}
-                      <p className="text-[8px] text-[var(--muted)] mt-3 uppercase tracking-tighter font-medium">
-                        {new Date(h.week).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </p>
-                    </div>
-                  ))}
+                      {/* Line */}
+                      <path
+                        d={`
+                          M 0,${100 - (history[0]?.score || 0)}
+                          ${history.map((h, i) => {
+                            const x = (i / (Math.max(1, history.length - 1))) * 400;
+                            const y = 100 - h.score;
+                            return `L ${x},${y}`;
+                          }).join(' ')}
+                        `}
+                        fill="none"
+                        stroke="var(--primary)"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="transition-all duration-1000"
+                      />
+                      
+                      {/* Points */}
+                      {history.map((h, i) => {
+                        const x = (i / (Math.max(1, history.length - 1))) * 400;
+                        const y = 100 - h.score;
+                        return (
+                          <g key={h.week} className="group/point">
+                            <circle
+                              cx={x}
+                              cy={y}
+                              r="3"
+                              fill="white"
+                              stroke="var(--primary)"
+                              strokeWidth="2"
+                              className="transition-all group-hover/point:r-4"
+                            />
+                            {/* Hidden Tooltip Area */}
+                            <rect
+                              x={x - 20}
+                              y="0"
+                              width="40"
+                              height="100"
+                              fill="transparent"
+                              className="cursor-pointer"
+                            />
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
                   
-                  {/* Placeholder bars if history is short, to keep layout consistent */}
-                  {history.length < 4 && Array.from({ length: 4 - history.length }).map((_, i) => (
-                    <div key={`blank-${i}`} className="flex-grow flex flex-col items-center opacity-20">
-                      <div className="w-full h-8 bg-stone-50 rounded-t-xl border-x border-t border-stone-50" />
-                      <p className="text-[8px] text-transparent mt-3">...</p>
-                    </div>
-                  ))}
+                  {/* Date Labels below the chart */}
+                  <div className="flex justify-between mt-4 px-1">
+                    {history.map((h) => (
+                      <div key={h.week} className="text-center">
+                        <p className="text-[8px] text-[var(--muted)] uppercase tracking-tighter font-medium">
+                          {new Date(h.week).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
