@@ -4,4 +4,4 @@ compatibility_date = "2026-01-23"
 
 # Fixed Trigger Format
 [triggers]
-crons = ["0 9 * * 1"]
+crons = ["0 9 * * 0"]

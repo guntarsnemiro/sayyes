@@ -34,10 +34,10 @@ export const CHECKIN_CATEGORIES = [
 export function getWeekDate() {
   const now = new Date();
   const day = now.getDay();
-  // Get the date of the most recent Monday
-  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(now.setDate(diff));
-  return monday.toISOString().split('T')[0];
+  // Get the date of the most recent Sunday
+  const diff = now.getDate() - day;
+  const sunday = new Date(now.setDate(diff));
+  return sunday.toISOString().split('T')[0];
 }
 
 export const CONVERSATION_STARTERS: Record<string, string> = {

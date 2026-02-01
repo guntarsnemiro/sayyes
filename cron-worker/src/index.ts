@@ -27,6 +27,6 @@ export default {
 
   // Also allow manual triggering via URL for testing (optional)
   async fetch(request: Request, env: Env, ctx: any) {
-    return new Response("SayYes Heartbeat is active. It runs every Monday at 09:00 UTC.");
+    return new Response("SayYes Heartbeat is active. It runs every Sunday at 09:00 UTC.");
   }
 };
