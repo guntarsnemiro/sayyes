@@ -1,14 +1,14 @@
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
 import { sendPushNotification } from '@/lib/push';
+import { getWeekDate } from '@/lib/checkin';
 
 export const runtime = 'edge';
 
 /**
- * MONDAY MORNING REMINDERS
- * Strategy: Push-First, Email-Fallback.
- * If a user has a push subscription, we send a push notification.
- * If not, we send an email via Resend BATCH API.
+ * SUNDAY MORNING REMINDERS
+ * Strategy: Send to all registered users (couples and singles).
+ * Safety: Uses last_reminder_at to prevent double-sending in the same week.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -24,20 +24,31 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 2. Find all registered users and their push subscriptions
+    const weekDate = getWeekDate();
+
+    // 2. Find all users who haven't received a reminder this week
     const usersData = await db.prepare(`
-      SELECT u.id, u.email, u.name, u.couple_id, ps.subscription_json
+      SELECT u.id, u.email, u.name, u.couple_id, u.last_reminder_at, ps.subscription_json
       FROM users u
       LEFT JOIN push_subscriptions ps ON u.id = ps.user_id
-    `).all<{ id: string, email: string, name: string, couple_id: string | null, subscription_json: string | null }>();
+      WHERE u.last_reminder_at IS NULL OR u.last_reminder_at != ?
+    `).bind(weekDate).all<{ 
+      id: string, 
+      email: string, 
+      name: string, 
+      couple_id: string | null, 
+      last_reminder_at: string | null,
+      subscription_json: string | null 
+    }>();
 
     if (!usersData.results || usersData.results.length === 0) {
-      return NextResponse.json({ success: true, count: 0 });
+      return NextResponse.json({ success: true, message: 'All users already notified for this week', count: 0 });
     }
 
     // 3. Prepare notifications
     const pushTasks: { sub: string, title: string, body: string }[] = [];
     const emailTasks: any[] = [];
+    const notifiedUserIds: string[] = [];
     const seenEmails = new Set<string>();
 
     usersData.results.forEach(user => {
@@ -58,6 +69,7 @@ export async function GET(request: NextRequest) {
       // EMAIL NOTIFICATION
       if (!seenEmails.has(user.email.toLowerCase())) {
         seenEmails.add(user.email.toLowerCase());
+        notifiedUserIds.push(user.id);
         
         const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
         const subject = isInCouple ? 'A new week has started' : 'Ready to start with your partner?';
@@ -120,9 +132,30 @@ export async function GET(request: NextRequest) {
           body: JSON.stringify(emailTasks),
         });
 
-        if (res.ok) emailSentCount = emailTasks.length;
+        if (res.ok) {
+          emailSentCount = emailTasks.length;
+          
+          // 6. UPDATE SAFETY LOCK in DB
+          // We mark users as notified so a repeat trigger won't double-send
+          const placeholders = notifiedUserIds.map(() => '?').join(',');
+          await db.prepare(`
+            UPDATE users SET last_reminder_at = ? WHERE id IN (${placeholders})
+          `).bind(weekDate, ...notifiedUserIds).run();
+        }
       }
     }
+
+    return NextResponse.json({ 
+      success: true, 
+      push_sent: pushSentCount,
+      emails_sent: emailSentCount
+    });
+
+  } catch (err) {
+    console.error('Cron error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
 
     return NextResponse.json({ 
       success: true, 
