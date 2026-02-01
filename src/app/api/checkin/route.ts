@@ -41,25 +41,26 @@ export async function POST(request: NextRequest) {
     // 3. TRIGGER PUSH NOTIFICATION TO PARTNER (Only if in a couple)
     if (user.couple_id) {
       try {
-      // Find partner's subscriptions
-      const partnerSubs = await db.prepare(`
-        SELECT subscription_json FROM push_subscriptions 
-        WHERE user_id = (SELECT id FROM users WHERE couple_id = ? AND id != ? LIMIT 1)
-      `).bind(user.couple_id, user.id).all<{ subscription_json: string }>();
+        // Find partner's subscriptions
+        const partnerSubs = await db.prepare(`
+          SELECT subscription_json FROM push_subscriptions 
+          WHERE user_id = (SELECT id FROM users WHERE couple_id = ? AND id != ? LIMIT 1)
+        `).bind(user.couple_id, user.id).all<{ subscription_json: string }>();
 
-      if (partnerSubs.results && partnerSubs.results.length > 0) {
-        const userName = user.name?.split(' ')[0] || 'Your partner';
-        const title = 'Check-in Finished! ✨';
-        const body = `${userName} has completed their check-in.`;
-        
-        // Send to all partner devices
-        const pushPromises = partnerSubs.results.map(sub => 
-          sendPushNotification(sub.subscription_json, title, body, '/dashboard')
-        );
-        await Promise.all(pushPromises);
+        if (partnerSubs.results && partnerSubs.results.length > 0) {
+          const userName = user.name?.split(' ')[0] || 'Your partner';
+          const title = 'Check-in Finished! ✨';
+          const body = `${userName} has completed their check-in.`;
+          
+          // Send to all partner devices
+          const pushPromises = partnerSubs.results.map(sub => 
+            sendPushNotification(sub.subscription_json, title, body, '/dashboard')
+          );
+          await Promise.all(pushPromises);
+        }
+      } catch (pushErr) {
+        console.error('Push notification failed but check-in saved:', pushErr);
       }
-    } catch (pushErr) {
-      console.error('Push notification failed but check-in saved:', pushErr);
     }
 
     return NextResponse.json({ success: true });
