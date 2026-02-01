@@ -106,21 +106,37 @@ export function calculateAlignment(answers1: Record<string, number>, answers2: R
 export function calculateWeeklyScore(answers1: Record<string, number>, answers2: Record<string, number>): number {
   let totalDiff = 0;
   let categoriesCount = 0;
+  let singleTotal = 0;
+  let singleCount = 0;
 
   for (const cat of CHECKIN_CATEGORIES) {
-    if (answers1[cat.id] !== undefined && answers2[cat.id] !== undefined) {
-      totalDiff += Math.abs(answers1[cat.id] - answers2[cat.id]);
+    const s1 = answers1[cat.id];
+    const s2 = answers2[cat.id];
+
+    if (s1 !== undefined && s2 !== undefined) {
+      totalDiff += Math.abs(s1 - s2);
       categoriesCount++;
+    }
+    
+    if (s1 !== undefined) {
+      singleTotal += s1;
+      singleCount++;
     }
   }
 
-  if (categoriesCount === 0) return 0;
+  // If we have both, return ALIGNMENT SCORE
+  if (categoriesCount > 0) {
+    const maxDiff = categoriesCount * 4;
+    const score = Math.round(((maxDiff - totalDiff) / maxDiff) * 100);
+    return Math.max(0, score);
+  }
 
-  // Max difference per category is 4 (5-1). Total max diff = 4 * 5 = 20.
-  // We want a score where 100% is perfect alignment (diff = 0)
-  const maxDiff = categoriesCount * 4;
-  const score = Math.round(((maxDiff - totalDiff) / maxDiff) * 100);
-  return Math.max(0, score);
+  // If we only have one person, return FULFILLMENT SCORE (average out of 5)
+  if (singleCount > 0) {
+    return Math.round((singleTotal / (singleCount * 5)) * 100);
+  }
+
+  return 0;
 }
 
 export function calculateAverageScore(answers1: Record<string, number>, answers2: Record<string, number>): number {

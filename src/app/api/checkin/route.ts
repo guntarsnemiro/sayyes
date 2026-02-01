@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
     const db = env.DB;
     
     const user = await getSession(db);
-    if (!user || !user.couple_id) {
-      return NextResponse.json({ error: 'Unauthorized or not in a couple' }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { answers } = await request.json() as { 
@@ -33,13 +33,14 @@ export async function POST(request: NextRequest) {
       return db.prepare(`
         INSERT INTO checkins (user_id, couple_id, week_date, category, score, note)
         VALUES (?, ?, ?, ?, ?, ?)
-      `).bind(user.id, user.couple_id, weekDate, category, data.score, data.note || null);
+      `).bind(user.id, user.couple_id || null, weekDate, category, data.score, data.note || null);
     });
 
     await db.batch(statements);
 
-    // 3. TRIGGER PUSH NOTIFICATION TO PARTNER
-    try {
+    // 3. TRIGGER PUSH NOTIFICATION TO PARTNER (Only if in a couple)
+    if (user.couple_id) {
+      try {
       // Find partner's subscriptions
       const partnerSubs = await db.prepare(`
         SELECT subscription_json FROM push_subscriptions 
