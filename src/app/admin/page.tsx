@@ -31,12 +31,21 @@ interface Feedback {
   name: string | null;
 }
 
+interface Report {
+  email: string;
+  name: string | null;
+  week_date: string;
+  completed_at: string;
+  categories_done: number;
+}
+
 export default function AdminDashboard() {
   const [data, setData] = useState<{ 
     stats: Stats, 
     latestUsers: User[], 
     latestInvites: Invite[],
-    latestFeedback: Feedback[]
+    latestFeedback: Feedback[],
+    latestReports: Report[]
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -136,6 +145,53 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
+
+        {/* Latest Completed Reports */}
+        <section className="space-y-6">
+          <h2 className="text-sm uppercase tracking-widest text-stone-400 font-medium px-2">Latest Completed Reports</h2>
+          <div className="bg-white border border-stone-200 rounded-[2rem] overflow-hidden shadow-sm">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-stone-50 border-b border-stone-100 text-[10px] uppercase tracking-widest text-stone-400">
+                <tr>
+                  <th className="px-6 py-4 font-medium">User</th>
+                  <th className="px-6 py-4 font-medium">Week</th>
+                  <th className="px-6 py-4 font-medium">Finished</th>
+                  <th className="px-6 py-4 font-medium text-right">Progress</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-50">
+                {data?.latestReports.map((report, i) => (
+                  <tr key={i} className="hover:bg-stone-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <p className="font-medium text-[#44403c]">{report.name || 'Anonymous'}</p>
+                      <p className="text-[10px] text-stone-400 lowercase">{report.email}</p>
+                    </td>
+                    <td className="px-6 py-4 text-stone-500 text-xs">
+                      {new Date(report.week_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </td>
+                    <td className="px-6 py-4 text-stone-400 text-xs whitespace-nowrap">
+                      {new Date(report.completed_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className={`text-[9px] px-2 py-0.5 rounded-full border ${
+                        report.categories_done >= 5 ? 'bg-green-50 text-green-600 border-green-100' : 'bg-stone-50 text-stone-400 border-stone-100'
+                      }`}>
+                        {report.categories_done}/5 Categories
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {data?.latestReports.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-stone-400 text-xs uppercase tracking-widest">
+                      No reports completed yet
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Latest Registrations */}

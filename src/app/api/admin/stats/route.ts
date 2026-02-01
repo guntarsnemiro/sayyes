@@ -48,6 +48,16 @@ export async function GET() {
       LIMIT 20
     `).all<{ type: string, message: string, created_at: string, email: string, name: string | null }>();
 
+    // 5. Get Latest Completed Reports (new)
+    const latestReports = await db.prepare(`
+      SELECT u.email, u.name, c.week_date, MAX(c.created_at) as completed_at, COUNT(c.category) as categories_done
+      FROM checkins c
+      JOIN users u ON c.user_id = u.id
+      GROUP BY u.id, c.week_date
+      ORDER BY completed_at DESC
+      LIMIT 20
+    `).all<{ email: string, name: string | null, week_date: string, completed_at: string, categories_done: number }>();
+
     return NextResponse.json({
       stats: {
         users: userCount?.count || 0,
@@ -57,7 +67,8 @@ export async function GET() {
       },
       latestUsers: latestUsers.results,
       latestInvites: latestInvites.results,
-      latestFeedback: latestFeedback.results
+      latestFeedback: latestFeedback.results,
+      latestReports: latestReports.results // Added latest reports
     });
   } catch (err) {
     console.error('Admin stats error:', err);
