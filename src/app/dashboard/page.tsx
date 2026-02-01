@@ -255,44 +255,73 @@ export default async function DashboardPage() {
 
           {history.length > 0 && (
             <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm">
-              <div className="flex justify-between items-end mb-8">
+              {/* Header with Averages on one line */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
-                  <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-1">Relationship Pulse</p>
+                  <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest mb-1">Relationship Pulse</p>
                   <h3 className="text-lg font-light text-[var(--primary)]">Weekly Progress</h3>
                 </div>
+                
+                {/* Averages in the middle */}
+                <div className="flex gap-6 border-x border-stone-50 px-6 py-1">
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-[var(--primary)]">{currentWeekAvg.toFixed(1)}</p>
+                    <p className="text-[8px] text-[var(--muted)] uppercase tracking-widest">This Week</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-[var(--primary)]">{eightWeekAvg.toFixed(1)}</p>
+                    <p className="text-[8px] text-[var(--muted)] uppercase tracking-widest">8-Week Avg</p>
+                  </div>
+                </div>
+
                 <div className="text-right">
                   <p className="text-2xl font-light text-[var(--primary)]">{history[history.length-1].score}%</p>
-                  <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest">{partner ? 'Alignment' : 'Self-Reflection'}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-8 py-4 border-y border-stone-50">
-                <div className="text-center border-r border-stone-50">
-                  <p className="text-xl font-light text-[var(--primary)]">{currentWeekAvg.toFixed(1)}</p>
-                  <p className="text-[9px] text-[var(--muted)] uppercase tracking-widest mt-1">This Week Avg</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xl font-light text-[var(--primary)]">{eightWeekAvg.toFixed(1)}</p>
-                  <p className="text-[9px] text-[var(--muted)] uppercase tracking-widest mt-1">8-Week Avg</p>
+                  <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest">
+                    {partner ? 'Alignment' : 'Self-Reflection'}
+                  </p>
                 </div>
               </div>
               
-              {history.length > 1 && (
-                <div className="h-32 w-full flex items-end gap-2">
+              {/* The Pulse Graph Bars */}
+              {history.length >= 1 && (
+                <div className="h-32 w-full flex items-end gap-3 px-2">
                   {history.map((h, i) => (
                     <div key={h.week} className="flex-grow flex flex-col items-center group relative">
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[var(--primary)] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                        {h.score}%
+                      {/* Tooltip */}
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[var(--primary)] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 shadow-sm">
+                        {h.score}% {partner ? 'Alignment' : 'Score'}
                       </div>
-                      <div className="w-full bg-stone-100 rounded-t-lg transition-all group-hover:bg-stone-200 relative overflow-hidden" style={{ height: `${Math.max(10, h.score)}%` }}>
-                        <div className="absolute bottom-0 left-0 right-0 bg-[var(--primary)] opacity-20" style={{ height: '100%' }} />
+                      
+                      {/* The Bar */}
+                      <div 
+                        className="w-full bg-stone-50 rounded-t-xl transition-all group-hover:bg-stone-100 relative overflow-hidden border-x border-t border-stone-50"
+                        style={{ height: `${Math.max(15, h.score)}%` }}
+                      >
+                        {/* Fill Color */}
+                        <div 
+                          className={`absolute bottom-0 left-0 right-0 bg-[var(--primary)] transition-all ${
+                            i === history.length - 1 ? 'opacity-60' : 'opacity-30'
+                          }`}
+                          style={{ height: '100%' }}
+                        />
+                        {/* Current Week Pulse Effect */}
                         {i === history.length - 1 && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-[var(--primary)] opacity-40 animate-pulse" style={{ height: '100%' }} />
+                          <div className="absolute inset-0 bg-white/20 animate-pulse" />
                         )}
                       </div>
-                      <p className="text-[8px] text-[var(--muted)] mt-2 uppercase tracking-tighter">
+                      
+                      {/* Date Label */}
+                      <p className="text-[8px] text-[var(--muted)] mt-3 uppercase tracking-tighter font-medium">
                         {new Date(h.week).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </p>
+                    </div>
+                  ))}
+                  
+                  {/* Placeholder bars if history is short, to keep layout consistent */}
+                  {history.length < 4 && Array.from({ length: 4 - history.length }).map((_, i) => (
+                    <div key={`blank-${i}`} className="flex-grow flex flex-col items-center opacity-20">
+                      <div className="w-full h-8 bg-stone-50 rounded-t-xl border-x border-t border-stone-50" />
+                      <p className="text-[8px] text-transparent mt-3">...</p>
                     </div>
                   ))}
                 </div>
