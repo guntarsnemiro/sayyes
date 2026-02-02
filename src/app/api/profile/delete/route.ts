@@ -21,7 +21,11 @@ export async function POST(request: NextRequest) {
     const expectedConfirmation = "DELETE";
     const userName = user.name || "";
 
-    if (confirmation !== expectedConfirmation && confirmation !== userName) {
+    const normalizedConfirmation = confirmation.trim().toUpperCase();
+    const normalizedExpected = expectedConfirmation.toUpperCase();
+    const normalizedUserName = userName.trim().toUpperCase();
+
+    if (normalizedConfirmation !== normalizedExpected && normalizedConfirmation !== normalizedUserName) {
       return NextResponse.json({ error: 'Confirmation does not match' }, { status: 400 });
     }
 

@@ -19,7 +19,7 @@ export default function DeleteAccount({ userName }: { userName: string }) {
       const res = await fetch('/api/profile/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ confirmation }),
+        body: JSON.stringify({ confirmation: confirmation.trim() }),
       });
 
       if (res.ok) {
@@ -35,6 +35,9 @@ export default function DeleteAccount({ userName }: { userName: string }) {
       setLoading(false);
     }
   };
+
+  const isConfirmed = confirmation.trim().toUpperCase() === 'DELETE' || 
+                     (userName && confirmation.trim().toUpperCase() === userName.trim().toUpperCase());
 
   if (!isOpen) {
     return (
@@ -77,7 +80,7 @@ export default function DeleteAccount({ userName }: { userName: string }) {
           <div className="flex flex-col gap-2">
             <button
               type="submit"
-              disabled={loading || (confirmation !== 'DELETE' && confirmation !== userName)}
+              disabled={loading || !isConfirmed}
               className="w-full bg-rose-500 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-rose-600 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {loading ? 'Deleting...' : 'Permanently Delete My Data'}
