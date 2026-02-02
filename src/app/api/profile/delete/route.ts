@@ -30,20 +30,51 @@ export async function POST(request: NextRequest) {
     }
 
     // Begin deletion process
-    // 1. Delete check-ins
+    if (user.couple_id) {
+      // 1. Uncouple the partner if they exist
+      await db.prepare('UPDATE users SET couple_id = NULL WHERE couple_id = ? AND id != ?')
+        .bind(user.couple_id, user.id)
+        .run();
+    }
+
+    // 2. Delete check-ins
     await db.prepare('DELETE FROM checkins WHERE user_id = ?').bind(user.id).run();
     
-    // 2. Delete commitments
+    // 3. Delete commitments
     await db.prepare('DELETE FROM commitments WHERE user_id = ?').bind(user.id).run();
     
-    // 3. Delete invitations sent by the user
-    await db.prepare('DELETE FROM invitations WHERE inviter_id = ?').bind(user.id).run();
+    // 4. Delete invitations sent by or to the user
+    await db.prepare('DELETE FROM invitations WHERE inviter_id = ? OR invitee_email = ?')
+      .bind(user.id, user.email)
+      .run();
     
-    // 4. Delete sessions
+    // 5. Delete push subscriptions
+    await db.prepare('DELETE FROM push_subscriptions WHERE user_id = ?').bind(user.id).run();
+
+    // 6. Delete feedback
+    await db.prepare('DELETE FROM feedback WHERE user_id = ?').bind(user.id).run();
+
+    // 7. Delete magic links
+    await db.prepare('DELETE FROM magic_links WHERE email = ?').bind(user.email).run();
+
+    // 8. Delete sessions
     await db.prepare('DELETE FROM sessions WHERE user_id = ?').bind(user.id).run();
     
-    // 5. Delete the user record
+    // 9. Delete the user record
     await db.prepare('DELETE FROM users WHERE id = ?').bind(user.id).run();
+
+    // 10. Clean up orphaned couple record if no one is left
+    if (user.couple_id) {
+      const remaining = await db.prepare('SELECT COUNT(*) as count FROM users WHERE couple_id = ?')
+        .bind(user.couple_id)
+        .first<{ count: number }>();
+      
+      if (!remaining || remaining.count === 0) {
+        // No one left in the couple, delete the couple record and its associated data
+        // Note: partner's checkins would have been deleted if they also deleted their account
+        await db.prepare('DELETE FROM couples WHERE id = ?').bind(user.couple_id).run();
+      }
+    }
 
     // Create response and clear the session cookie
     const response = NextResponse.json({ success: true });
