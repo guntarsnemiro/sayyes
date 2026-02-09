@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS invitations (
 CREATE TABLE IF NOT EXISTS checkins (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
-    couple_id TEXT NOT NULL,
+    couple_id TEXT, -- Nullable for solo users
     week_date TEXT NOT NULL,
     category TEXT NOT NULL,
     score INTEGER NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS checkins (
 CREATE TABLE IF NOT EXISTS commitments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
-    couple_id TEXT NOT NULL,
+    couple_id TEXT, -- Nullable for solo users
     status TEXT NOT NULL, -- 'yes', 'unsure', 'no'
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
