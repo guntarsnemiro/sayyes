@@ -3,13 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  alternates: {
-    canonical: '/auth/login',
-  },
-};
 
 function LoginContent() {
   const searchParams = useSearchParams();
