@@ -1,4 +1,11 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: '/',
+  },
+};
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -154,7 +161,11 @@ export default async function Home() {
             <Link href="/how-it-works" className="hover:text-[var(--primary)] transition-colors">How it works</Link>
             <Link href="/privacy" className="hover:text-[var(--primary)] transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-[var(--primary)] transition-colors">Terms of Service</Link>
-            <a href="mailto:info@sayyesapp.com" className="hover:text-[var(--primary)] transition-colors">info@sayyesapp.com</a>
+            <a href="mailto:info@sayyesapp.com" className="hover:text-[var(--primary)] transition-colors">
+              <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />
+              info@sayyesapp.com
+              <span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} />
+            </a>
           </div>
 
           <p className="text-[10px] text-[var(--accent)]">

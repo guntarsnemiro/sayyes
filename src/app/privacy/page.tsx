@@ -1,4 +1,11 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: '/privacy',
+  },
+};
 
 export const runtime = 'edge';
 
@@ -48,7 +55,7 @@ export default function PrivacyPage() {
             <p>
               You own your data. You may request to see your information or have your 
               account and all associated data deleted at any time by contacting us at 
-              info@sayyesapp.com.
+              <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />info@sayyesapp.com<span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} />.
             </p>
           </section>
 
@@ -62,7 +69,7 @@ export default function PrivacyPage() {
         </div>
 
         <footer className="pt-12 border-t border-stone-100">
-          <p className="text-sm">Contact: info@sayyesapp.com</p>
+          <p className="text-sm">Contact: <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />info@sayyesapp.com<span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} /></p>
         </footer>
       </div>
     </main>

@@ -1,4 +1,11 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: '/terms',
+  },
+};
 
 export const runtime = 'edge';
 
@@ -60,7 +67,7 @@ export default function TermsPage() {
         </div>
 
         <footer className="pt-12 border-t border-stone-100">
-          <p className="text-sm">Contact: info@sayyesapp.com</p>
+          <p className="text-sm">Contact: <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />info@sayyesapp.com<span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} /></p>
         </footer>
       </div>
     </main>

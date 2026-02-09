@@ -1,4 +1,11 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: '/how-it-works',
+  },
+};
 
 export const runtime = 'edge';
 
@@ -88,7 +95,7 @@ export default function HowItWorksPage() {
             <Link href="/auth/login" className="inline-block bg-[#44403c] text-white px-8 py-3 rounded-full font-medium active:scale-95 transition-all text-center self-start">
               Start your first check-in
             </Link>
-            <p className="text-sm">Contact: info@sayyesapp.com</p>
+            <p className="text-sm">Contact: <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />info@sayyesapp.com<span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} /></p>
           </div>
         </footer>
       </div>

@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://sayyesapp.com"),
   title: "SayYes — A weekly connection for couples who choose to stay together",
   description: "SayYes is a calm, weekly relationship check-in for couples who want to stay together. Not therapy. No pressure. Just clarity and connection.",
   manifest: "/manifest.json",
@@ -24,9 +25,6 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
-  },
-  alternates: {
-    canonical: "https://sayyesapp.com/",
   },
   openGraph: {
     title: "SayYes — A weekly connection for couples who choose to stay together",

@@ -227,7 +227,11 @@ export default async function DashboardPage() {
               {pendingInvite && (
                 <div className="mt-8 pt-8 border-t border-stone-100">
                   <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest mb-2">Pending Invitation</p>
-                  <p className="text-xs text-[var(--primary)] font-medium">{pendingInvite.invitee_email}</p>
+                  <p className="text-xs text-[var(--primary)] font-medium">
+                    <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />
+                    {pendingInvite.invitee_email}
+                    <span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} />
+                  </p>
                   <CopyInviteButton inviteId={pendingInvite.id} />
                 </div>
               )}

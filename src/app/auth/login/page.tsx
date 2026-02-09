@@ -3,6 +3,13 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: '/auth/login',
+  },
+};
 
 function LoginContent() {
   const searchParams = useSearchParams();
@@ -48,14 +55,14 @@ function LoginContent() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-[var(--background)]">
-      <div className="w-full max-w-sm space-y-8">
+      <div className="w-full max-w-sm space-y-8 flex-grow flex flex-col justify-center">
         <div className="text-center">
           <Link href="/" className="text-2xl font-light tracking-tight text-[var(--primary)]">
             SayYes
           </Link>
-          <h2 className="mt-6 text-xl font-medium text-[var(--primary)]">
+          <h1 className="mt-6 text-xl font-medium text-[var(--primary)]">
             Welcome back
-          </h2>
+          </h1>
           <p className="mt-2 text-sm text-[var(--muted)]">
             Sign in to your weekly connection.
           </p>
@@ -126,6 +133,17 @@ function LoginContent() {
           )}
         </div>
       </div>
+
+      <footer className="w-full py-8 text-center space-y-4">
+        <div className="flex justify-center gap-6 text-[10px] text-[var(--muted)] uppercase tracking-widest">
+          <Link href="/how-it-works" className="hover:text-[var(--primary)] transition-colors">How it works</Link>
+          <Link href="/privacy" className="hover:text-[var(--primary)] transition-colors">Privacy</Link>
+          <Link href="/terms" className="hover:text-[var(--primary)] transition-colors">Terms</Link>
+        </div>
+        <p className="text-[10px] text-[var(--accent)]">
+          &copy; {new Date().getFullYear()} SayYes. All rights reserved.
+        </p>
+      </footer>
     </main>
   );
 }
