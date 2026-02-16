@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  alternates: {
-    canonical: '/auth/login',
-  },
-  openGraph: {
-    url: '/auth/login',
+  robots: {
+    index: false,
   },
 };
 
-export default function LoginLayout({
+export default function CommitmentLayout({
   children,
 }: {
   children: React.ReactNode;

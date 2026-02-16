@@ -57,7 +57,7 @@ function LoginContent() {
             Welcome back
           </h1>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Sign in to your weekly connection.
+            Sign in to your weekly connection. SayYes is a private, intentional space designed to help couples maintain their bond through a simple weekly rhythm.
           </p>
         </div>
 

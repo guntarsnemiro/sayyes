@@ -1,9 +1,13 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import Footer from '../Footer';
 
 export const metadata: Metadata = {
   alternates: {
     canonical: '/terms',
+  },
+  openGraph: {
+    url: '/terms',
   },
 };
 
@@ -11,8 +15,8 @@ export const runtime = 'edge';
 
 export default function TermsPage() {
   return (
-    <main className="flex min-h-screen flex-col bg-[var(--background)] p-6 md:p-24">
-      <div className="max-w-2xl mx-auto w-full space-y-12">
+    <main className="flex min-h-screen flex-col bg-[var(--background)]">
+      <div className="max-w-2xl mx-auto w-full space-y-12 p-6 md:p-24 flex-grow">
         <header>
           <Link href="/" className="text-xs text-[var(--muted)] uppercase tracking-widest hover:text-[var(--primary)] transition-colors">
             ← Home
@@ -65,11 +69,8 @@ export default function TermsPage() {
             </p>
           </section>
         </div>
-
-        <footer className="pt-12 border-t border-stone-100">
-          <p className="text-sm">Contact: <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />info@sayyesapp.com<span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} /></p>
-        </footer>
       </div>
+      <Footer />
     </main>
   );
 }

@@ -1,9 +1,13 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import Footer from '../Footer';
 
 export const metadata: Metadata = {
   alternates: {
     canonical: '/how-it-works',
+  },
+  openGraph: {
+    url: '/how-it-works',
   },
 };
 
@@ -11,8 +15,8 @@ export const runtime = 'edge';
 
 export default function HowItWorksPage() {
   return (
-    <main className="flex min-h-screen flex-col bg-[var(--background)] p-6 md:p-24">
-      <div className="max-w-2xl mx-auto w-full space-y-12">
+    <main className="flex min-h-screen flex-col bg-[var(--background)]">
+      <div className="max-w-2xl mx-auto w-full space-y-12 p-6 md:p-24 flex-grow">
         <header>
           <Link href="/" className="text-xs text-[var(--muted)] uppercase tracking-widest hover:text-[var(--primary)] transition-colors">
             ← Home
@@ -21,7 +25,9 @@ export default function HowItWorksPage() {
           <p className="text-xs text-[var(--muted)] uppercase tracking-widest mt-2">Sustainable clarity for long-term connection</p>
         </header>
 
+        {/* ... previous content ... */}
         <div className="space-y-12 text-[var(--muted)] leading-relaxed">
+          {/* ... sections ... */}
           <section className="space-y-4">
             <h2 className="text-xl font-medium text-[var(--primary)]">The Rhythm of Consistency</h2>
             <p>
@@ -90,15 +96,13 @@ export default function HowItWorksPage() {
           </section>
         </div>
 
-        <footer className="pt-12 border-t border-stone-100">
-          <div className="flex flex-col gap-4">
-            <Link href="/auth/login" className="inline-block bg-[#44403c] text-white px-8 py-3 rounded-full font-medium active:scale-95 transition-all text-center self-start">
-              Start your first check-in
-            </Link>
-            <p className="text-sm">Contact: <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />info@sayyesapp.com<span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} /></p>
-          </div>
-        </footer>
+        <div className="pt-12 border-t border-stone-100">
+          <Link href="/auth/login" className="inline-block bg-[#44403c] text-white px-8 py-3 rounded-full font-medium active:scale-95 transition-all text-center self-start">
+            Start your first check-in
+          </Link>
+        </div>
       </div>
+      <Footer />
     </main>
   );
 }

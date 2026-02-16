@@ -29,10 +29,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: "SayYes — A weekly connection for couples who choose to stay together",
     description: "SayYes is a calm, weekly relationship check-in for couples who want to stay together. Not therapy. No pressure. Just clarity and connection.",
-    url: "https://sayyesapp.com/",
     siteName: "SayYes",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/icon.svg",
+        width: 800,
+        height: 600,
+        alt: "SayYes Logo",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",

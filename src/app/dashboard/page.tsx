@@ -205,7 +205,7 @@ export default async function DashboardPage() {
                   Edit
                 </Link>
                 {partner && partnerDone && (
-                  <Link href="/dashboard/results/" className="bg-stone-100 text-[var(--primary)] px-5 py-2 rounded-full text-sm font-medium hover:bg-stone-200 transition-colors">
+                  <Link href="/dashboard/results" className="bg-stone-100 text-[var(--primary)] px-5 py-2 rounded-full text-sm font-medium hover:bg-stone-200 transition-colors">
                     View
                   </Link>
                 )}
