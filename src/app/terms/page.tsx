@@ -13,6 +13,13 @@ export const metadata: Metadata = {
     description: "Read the terms of service for SayYes, a weekly relationship check-in for couples.",
     url: '/terms',
     type: 'website',
+    images: ["https://sayyesapp.com/icon.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms of Service — SayYes",
+    description: "Read the terms of service for SayYes, a weekly relationship check-in for couples.",
+    images: ["https://sayyesapp.com/icon.svg"],
   },
 };
 

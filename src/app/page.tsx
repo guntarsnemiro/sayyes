@@ -13,6 +13,13 @@ export const metadata: Metadata = {
     description: "SayYes is a calm, weekly relationship check-in designed to prevent drift and keep your connection intentional.",
     url: '/',
     type: 'website',
+    images: ["https://sayyesapp.com/icon.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SayYes — A weekly connection for couples who choose to stay together",
+    description: "SayYes is a calm, weekly relationship check-in designed to prevent drift and keep your connection intentional.",
+    images: ["https://sayyesapp.com/icon.svg"],
   },
 };
 

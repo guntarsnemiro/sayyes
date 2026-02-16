@@ -13,6 +13,13 @@ export const metadata: Metadata = {
     description: "SayYes is private-first. Learn how we protect your relationship data and keep your connection secure.",
     url: '/privacy',
     type: 'website',
+    images: ["https://sayyesapp.com/icon.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy — SayYes",
+    description: "SayYes is private-first. Learn how we protect your relationship data and keep your connection secure.",
+    images: ["https://sayyesapp.com/icon.svg"],
   },
 };
 

@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/icon.svg",
+        url: "https://sayyesapp.com/icon.svg",
         width: 800,
         height: 600,
         alt: "SayYes Logo",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SayYes — A weekly connection for couples who choose to stay together",
     description: "SayYes is a calm, weekly relationship check-in for couples who want to stay together. Not therapy. No pressure. Just clarity and connection.",
-    images: ["/icon.svg"],
+    images: ["https://sayyesapp.com/icon.svg"],
   },
 };
 

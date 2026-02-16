@@ -11,6 +11,13 @@ export const metadata: Metadata = {
     description: "Sign in to your weekly connection space. SayYes helps couples stay intentional and aligned.",
     url: '/auth/login',
     type: 'website',
+    images: ["https://sayyesapp.com/icon.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Login — SayYes",
+    description: "Sign in to your weekly connection space. SayYes helps couples stay intentional and aligned.",
+    images: ["https://sayyesapp.com/icon.svg"],
   },
 };
 

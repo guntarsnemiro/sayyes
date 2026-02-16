@@ -13,6 +13,13 @@ export const metadata: Metadata = {
     description: "Learn how a simple weekly rhythm can prevent relationship drift and build sustainable clarity for long-term connection.",
     url: '/how-it-works',
     type: 'website',
+    images: ["https://sayyesapp.com/icon.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "How it works — SayYes",
+    description: "Learn how a simple weekly rhythm can prevent relationship drift and build sustainable clarity for long-term connection.",
+    images: ["https://sayyesapp.com/icon.svg"],
   },
 };
 
