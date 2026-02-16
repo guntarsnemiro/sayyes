@@ -3,11 +3,16 @@ import type { Metadata } from 'next';
 import Footer from '../Footer';
 
 export const metadata: Metadata = {
+  title: "Terms of Service — SayYes",
+  description: "Read the terms of service for SayYes, a weekly relationship check-in for couples.",
   alternates: {
     canonical: '/terms',
   },
   openGraph: {
+    title: "Terms of Service — SayYes",
+    description: "Read the terms of service for SayYes, a weekly relationship check-in for couples.",
     url: '/terms',
+    type: 'website',
   },
 };
 

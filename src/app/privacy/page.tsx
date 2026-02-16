@@ -3,11 +3,16 @@ import type { Metadata } from 'next';
 import Footer from '../Footer';
 
 export const metadata: Metadata = {
+  title: "Privacy Policy — SayYes",
+  description: "SayYes is private-first. Learn how we protect your relationship data and keep your connection secure.",
   alternates: {
     canonical: '/privacy',
   },
   openGraph: {
+    title: "Privacy Policy — SayYes",
+    description: "SayYes is private-first. Learn how we protect your relationship data and keep your connection secure.",
     url: '/privacy',
+    type: 'website',
   },
 };
 

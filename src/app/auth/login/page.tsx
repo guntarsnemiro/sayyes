@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Footer from '../../Footer';
 
 function LoginContent() {
   const searchParams = useSearchParams();
@@ -127,16 +128,7 @@ function LoginContent() {
         </div>
       </div>
 
-      <footer className="w-full py-8 text-center space-y-4">
-        <div className="flex justify-center gap-6 text-[10px] text-[var(--muted)] uppercase tracking-widest">
-          <Link href="/how-it-works" className="hover:text-[var(--primary)] transition-colors">How it works</Link>
-          <Link href="/privacy" className="hover:text-[var(--primary)] transition-colors">Privacy</Link>
-          <Link href="/terms" className="hover:text-[var(--primary)] transition-colors">Terms</Link>
-        </div>
-        <p className="text-[10px] text-[var(--accent)]">
-          &copy; {new Date().getFullYear()} SayYes. All rights reserved.
-        </p>
-      </footer>
+      <Footer />
     </main>
   );
 }

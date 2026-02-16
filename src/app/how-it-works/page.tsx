@@ -3,11 +3,16 @@ import type { Metadata } from 'next';
 import Footer from '../Footer';
 
 export const metadata: Metadata = {
+  title: "How it works — SayYes",
+  description: "Learn how a simple weekly rhythm can prevent relationship drift and build sustainable clarity for long-term connection.",
   alternates: {
     canonical: '/how-it-works',
   },
   openGraph: {
+    title: "How it works — SayYes",
+    description: "Learn how a simple weekly rhythm can prevent relationship drift and build sustainable clarity for long-term connection.",
     url: '/how-it-works',
+    type: 'website',
   },
 };
 
@@ -25,9 +30,7 @@ export default function HowItWorksPage() {
           <p className="text-xs text-[var(--muted)] uppercase tracking-widest mt-2">Sustainable clarity for long-term connection</p>
         </header>
 
-        {/* ... previous content ... */}
         <div className="space-y-12 text-[var(--muted)] leading-relaxed">
-          {/* ... sections ... */}
           <section className="space-y-4">
             <h2 className="text-xl font-medium text-[var(--primary)]">The Rhythm of Consistency</h2>
             <p>
