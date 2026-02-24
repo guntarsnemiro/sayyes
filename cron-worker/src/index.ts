@@ -6,9 +6,13 @@ export default {
   // This function runs automatically on the schedule defined in wrangler.toml
   async scheduled(event: any, env: Env, ctx: any) {
     const siteUrl = "https://sayyesapp.com";
-    const endpoint = `${siteUrl}/api/cron/reminders`;
+    
+    // Check if it's Tuesday (day 2) or Sunday (day 0)
+    // event.cron might contain the cron string that triggered this
+    const isMidweek = event.cron === "0 9 * * 2";
+    const endpoint = `${siteUrl}/api/cron/reminders${isMidweek ? "?type=midweek" : ""}`;
 
-    console.log(`[Cron] Triggering reminders at ${endpoint}...`);
+    console.log(`[Cron] Triggering ${isMidweek ? "mid-week" : "Sunday"} reminders at ${endpoint}...`);
 
     try {
       const response = await fetch(endpoint, {
