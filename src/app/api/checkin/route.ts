@@ -3,6 +3,7 @@ import { getWeekDate } from '@/lib/checkin';
 import { sendPushNotification } from '@/lib/push';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
+import { sendEmail, getEmailTemplate } from '@/lib/email';
 
 export const runtime = 'edge';
 
@@ -38,28 +39,72 @@ export async function POST(request: NextRequest) {
 
     await db.batch(statements);
 
-    // 3. TRIGGER PUSH NOTIFICATION TO PARTNER (Only if in a couple)
+    // 3. NOTIFICATIONS (Only if in a couple)
     if (user.couple_id) {
       try {
-        // Find partner's subscriptions
-        const partnerSubs = await db.prepare(`
-          SELECT subscription_json FROM push_subscriptions 
-          WHERE user_id = (SELECT id FROM users WHERE couple_id = ? AND id != ? LIMIT 1)
-        `).bind(user.couple_id, user.id).all<{ subscription_json: string }>();
+        // Find partner's info and subscriptions
+        const partner = await db.prepare(`
+          SELECT id, email, name FROM users WHERE couple_id = ? AND id != ? LIMIT 1
+        `).bind(user.couple_id, user.id).first<{ id: string, email: string, name: string }>();
 
-        if (partnerSubs.results && partnerSubs.results.length > 0) {
+        if (partner) {
+          // Check if partner has finished their report
+          const partnerCheckins = await db.prepare(`
+            SELECT COUNT(id) as count FROM checkins WHERE user_id = ? AND week_date = ?
+          `).bind(partner.id, weekDate).first<{ count: number }>();
+
+          const partnerFinished = (partnerCheckins?.count || 0) >= 5;
           const userName = user.name?.split(' ')[0] || 'Your partner';
-          const title = 'Check-in Finished! ✨';
-          const body = `${userName} has completed their check-in.`;
-          
-          // Send to all partner devices
-          const pushPromises = partnerSubs.results.map(sub => 
-            sendPushNotification(sub.subscription_json, title, body, '/dashboard')
-          );
-          await Promise.all(pushPromises);
+          const partnerFirstName = partner.name?.split(' ')[0] || partner.email.split('@')[0];
+          const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+
+          // A. PUSH NOTIFICATION
+          const partnerSubs = await db.prepare(`
+            SELECT subscription_json FROM push_subscriptions WHERE user_id = ?
+          `).bind(partner.id).all<{ subscription_json: string }>();
+
+          if (partnerSubs.results && partnerSubs.results.length > 0) {
+            const title = partnerFinished ? 'Weekly Results Ready! ✨' : 'Partner Finished! ✨';
+            const body = partnerFinished 
+              ? `Both you and ${userName} have finished. Check your results now.` 
+              : `${userName} has completed their check-in. Now it's your turn!`;
+            
+            const pushPromises = partnerSubs.results.map(sub => 
+              sendPushNotification(sub.subscription_json, title, body, '/dashboard')
+            );
+            await Promise.all(pushPromises);
+          }
+
+          // B. EMAIL NOTIFICATION
+          let subject, bodyText, buttonText, buttonUrl;
+
+          if (partnerFinished) {
+            subject = 'Your weekly results are ready! ✨';
+            bodyText = `both you and ${userName} have finished your check-ins. Your alignment results and weekly focus are now ready to view.`;
+            buttonText = 'View Results';
+            buttonUrl = `${siteUrl}/dashboard/results`;
+          } else {
+            subject = `${userName} has finished their check-in!`;
+            bodyText = `${userName} just finished their weekly check-in. Now it's your turn! Once you're done, you'll be able to see where you're aligned this week.`;
+            buttonText = 'Start My Check-in';
+            buttonUrl = `${siteUrl}/dashboard`;
+          }
+
+          await sendEmail(env, {
+            to: partner.email,
+            subject,
+            text: `Hi ${partnerFirstName}, ${bodyText} ${buttonUrl}`,
+            html: getEmailTemplate(
+              partnerFirstName,
+              bodyText,
+              buttonText,
+              buttonUrl,
+              'You are receiving this because you are connected with your partner on SayYes.'
+            )
+          });
         }
-      } catch (pushErr) {
-        console.error('Push notification failed but check-in saved:', pushErr);
+      } catch (notifyErr) {
+        console.error('Notification failed but check-in saved:', notifyErr);
       }
     }
 

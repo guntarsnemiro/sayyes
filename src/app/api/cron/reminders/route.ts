@@ -2,13 +2,15 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
 import { sendPushNotification } from '@/lib/push';
 import { getWeekDate } from '@/lib/checkin';
+import { sendBatchEmails, getEmailTemplate } from '@/lib/email';
 
 export const runtime = 'edge';
 
 /**
- * SUNDAY MORNING REMINDERS
- * Strategy: Send to all registered users (couples and singles).
- * Safety: Uses last_reminder_at to prevent double-sending in the same week.
+ * WEEKLY REMINDERS
+ * Strategy:
+ * 1. Sunday (default): Send to all registered users to start the week.
+ * 2. Mid-week (type=midweek): Send to users who haven't completed their report after 48h.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -24,130 +26,134 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get('type') || 'sunday';
     const weekDate = getWeekDate();
+    const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
 
-    // 2. Find all users who haven't received a reminder this week
-    const usersData = await db.prepare(`
-      SELECT u.id, u.email, u.name, u.couple_id, u.last_reminder_at, ps.subscription_json
-      FROM users u
-      LEFT JOIN push_subscriptions ps ON u.id = ps.user_id
-      WHERE u.last_reminder_at IS NULL OR u.last_reminder_at != ?
-    `).bind(weekDate).all<{ 
-      id: string, 
-      email: string, 
-      name: string, 
-      couple_id: string | null, 
-      last_reminder_at: string | null,
-      subscription_json: string | null 
-    }>();
+    let users;
 
-    if (!usersData.results || usersData.results.length === 0) {
-      return NextResponse.json({ success: true, message: 'All users already notified for this week', count: 0 });
+    if (type === 'midweek') {
+      // 2a. Find users who HAVEN'T completed their check-in and HAVEN'T received a midweek reminder
+      // We check if they have at least 5 check-in records for this week
+      users = await db.prepare(`
+        SELECT u.id, u.email, u.name, u.couple_id, ps.subscription_json
+        FROM users u
+        LEFT JOIN push_subscriptions ps ON u.id = ps.user_id
+        WHERE (u.last_midweek_reminder_at IS NULL OR u.last_midweek_reminder_at != ?)
+        AND u.id NOT IN (
+          SELECT user_id FROM checkins 
+          WHERE week_date = ? 
+          GROUP BY user_id 
+          HAVING COUNT(category) >= 5
+        )
+      `).bind(weekDate, weekDate).all<{ 
+        id: string, 
+        email: string, 
+        name: string, 
+        couple_id: string | null,
+        subscription_json: string | null 
+      }>();
+    } else {
+      // 2b. Sunday Morning: Find all users who haven't received a reminder this week
+      users = await db.prepare(`
+        SELECT u.id, u.email, u.name, u.couple_id, ps.subscription_json
+        FROM users u
+        LEFT JOIN push_subscriptions ps ON u.id = ps.user_id
+        WHERE u.last_reminder_at IS NULL OR u.last_reminder_at != ?
+      `).bind(weekDate).all<{ 
+        id: string, 
+        email: string, 
+        name: string, 
+        couple_id: string | null,
+        subscription_json: string | null 
+      }>();
     }
 
-    // 3. Prepare notifications
+    if (!users.results || users.results.length === 0) {
+      return NextResponse.json({ success: true, message: 'No users to notify', count: 0 });
+    }
+
     const pushTasks: { sub: string, title: string, body: string }[] = [];
     const emailTasks: any[] = [];
     const notifiedUserIds: string[] = [];
     const seenEmails = new Set<string>();
 
-    usersData.results.forEach(user => {
+    users.results.forEach(user => {
       const isInCouple = !!user.couple_id;
       const firstName = user.name?.split(' ')[0] || user.email.split('@')[0];
 
-      // PUSH NOTIFICATION
-      if (user.subscription_json) {
-        pushTasks.push({
-          sub: user.subscription_json,
-          title: isInCouple ? 'A new week has started 💫' : 'Ready to start? ✨',
-          body: isInCouple 
-            ? 'Time for your weekly check-in. Take 2 minutes to connect.'
-            : 'Invite your partner to SayYes to start your weekly check-ins.'
-        });
-      }
-
-      // EMAIL NOTIFICATION
       if (!seenEmails.has(user.email.toLowerCase())) {
         seenEmails.add(user.email.toLowerCase());
         notifiedUserIds.push(user.id);
-        
-        const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
-        const subject = isInCouple ? 'A new week has started' : 'Ready to start with your partner?';
-        const bodyText = isInCouple
-          ? `Hi ${firstName}, it's Sunday! A new week has started. Take 2 minutes to check in with your partner on SayYes: ${siteUrl}/dashboard`
-          : `Hi ${firstName}, it's Sunday! Ready to start your weekly connection? Invite your partner to SayYes to begin your check-ins together: ${siteUrl}/dashboard`;
 
-        const htmlContent = `
-          <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; padding: 40px 20px; color: #44403c;">
-            <h1 style="font-size: 24px; font-weight: 300; margin-bottom: 24px;">SayYes</h1>
-            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 32px;">
-              Hi ${firstName}, ${isInCouple 
-                ? 'a new week has started. Take 2 minutes to check in with your partner and keep your connection intentional.' 
-                : 'ready to start your weekly connection? Invite your partner to SayYes today to begin your check-ins together.'}
-            </p>
-            <div style="text-align: center; margin-bottom: 32px;">
-              <a href="${siteUrl}/dashboard" style="display: inline-block; background-color: #44403c; color: #ffffff; padding: 12px 32px; border-radius: 9999px; text-decoration: none; font-weight: 500;">
-                ${isInCouple ? 'Go to Dashboard' : 'Invite Your Partner'}
-              </a>
-            </div>
-            <p style="font-size: 12px; color: #a8a29e; margin-top: 40px; border-top: 1px solid #e5e5e5; padding-top: 20px;">
-              SayYes — A weekly connection for couples.<br>
-              ${isInCouple 
-                ? 'You are receiving this because you are connected with your partner on SayYes.' 
-                : 'You are receiving this because you signed up for SayYes.'}
-            </p>
-          </div>
-        `;
+        let subject, bodyText, emailBody, buttonText, buttonUrl;
 
+        if (type === 'midweek') {
+          subject = 'Just a gentle nudge...';
+          bodyText = `we noticed you haven't checked in for this week yet. It only takes 2 minutes to keep your relationship intentional and prevent drift.`;
+          buttonText = 'Complete My Check-in';
+          buttonUrl = `${siteUrl}/dashboard`;
+        } else {
+          subject = isInCouple ? 'A new week has started' : 'Ready to start with your partner?';
+          bodyText = isInCouple 
+            ? 'a new week has started. Take 2 minutes to check in with your partner and keep your connection intentional.' 
+            : 'ready to start your weekly connection? Invite your partner to SayYes today to begin your check-ins together.';
+          buttonText = isInCouple ? 'Go to Dashboard' : 'Invite Your Partner';
+          buttonUrl = `${siteUrl}/dashboard`;
+        }
+
+        // PUSH
+        if (user.subscription_json) {
+          pushTasks.push({
+            sub: user.subscription_json,
+            title: subject,
+            body: bodyText
+          });
+        }
+
+        // EMAIL
         emailTasks.push({
           from: 'SayYes <info@sayyesapp.com>',
           to: user.email,
           subject,
-          text: bodyText,
-          html: htmlContent,
+          text: `Hi ${firstName}, ${bodyText} ${buttonUrl}`,
+          html: getEmailTemplate(
+            firstName, 
+            bodyText, 
+            buttonText, 
+            buttonUrl, 
+            isInCouple ? 'You are receiving this because you are connected with your partner on SayYes.' : 'You are receiving this because you signed up for SayYes.'
+          ),
         });
       }
     });
 
-    // 4. Handle Push Notifications
-    let pushSentCount = 0;
+    // 4. Handle Push
     if (pushTasks.length > 0) {
-      const results = await Promise.all(
-        pushTasks.map(task => sendPushNotification(task.sub, task.title, task.body))
-      );
-      pushSentCount = results.filter(Boolean).length;
+      await Promise.all(pushTasks.map(task => sendPushNotification(task.sub, task.title, task.body)));
     }
 
-    // 5. Handle Batch Emails
+    // 5. Handle Emails
     let emailSentCount = 0;
     if (emailTasks.length > 0) {
-      const resendApiKey = env.RESEND_API_KEY;
-      if (resendApiKey) {
-        const res = await fetch('https://api.resend.com/emails/batch', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${resendApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(emailTasks),
-        });
-
-        if (res.ok) {
-          emailSentCount = emailTasks.length;
-          
-          // 6. UPDATE SAFETY LOCK in DB
-          // We mark users as notified so a repeat trigger won't double-send
-          const placeholders = notifiedUserIds.map(() => '?').join(',');
-          await db.prepare(`
-            UPDATE users SET last_reminder_at = ? WHERE id IN (${placeholders})
-          `).bind(weekDate, ...notifiedUserIds).run();
-        }
+      const success = await sendBatchEmails(env, emailTasks);
+      if (success) {
+        emailSentCount = emailTasks.length;
+        
+        // 6. UPDATE SAFETY LOCK in DB
+        const placeholders = notifiedUserIds.map(() => '?').join(',');
+        const column = type === 'midweek' ? 'last_midweek_reminder_at' : 'last_reminder_at';
+        
+        await db.prepare(`
+          UPDATE users SET ${column} = ? WHERE id IN (${placeholders})
+        `).bind(weekDate, ...notifiedUserIds).run();
       }
     }
 
     return NextResponse.json({ 
       success: true, 
-      push_sent: pushSentCount,
+      type,
       emails_sent: emailSentCount
     });
 

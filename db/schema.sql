@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
     name TEXT,
     picture TEXT,
     couple_id TEXT,
+    last_reminder_at TEXT,
+    last_midweek_reminder_at TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
