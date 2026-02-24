@@ -18,9 +18,7 @@ export default function Footer() {
           <Link href="/privacy" className="hover:text-[var(--primary)] transition-colors">Privacy Policy</Link>
           <Link href="/terms" className="hover:text-[var(--primary)] transition-colors">Terms of Service</Link>
           <a href="mailto:info@sayyesapp.com" className="hover:text-[var(--primary)] transition-colors">
-            <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />
-            info@sayyesapp.com
-            <span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} />
+            info<span>@</span>sayyesapp.com
           </a>
         </div>
 

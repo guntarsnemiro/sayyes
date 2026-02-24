@@ -71,7 +71,7 @@ export default function PrivacyPage() {
             <p>
               You own your data. You may request to see your information or have your 
               account and all associated data deleted at any time by contacting us at 
-              <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />info@sayyesapp.com<span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} />.
+              info<span>@</span>sayyesapp.com.
             </p>
           </section>
 

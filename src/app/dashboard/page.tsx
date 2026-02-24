@@ -228,9 +228,7 @@ export default async function DashboardPage() {
                 <div className="mt-8 pt-8 border-t border-stone-100">
                   <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest mb-2">Pending Invitation</p>
                   <p className="text-xs text-[var(--primary)] font-medium">
-                    <span dangerouslySetInnerHTML={{ __html: '<!--email_off-->' }} />
-                    {pendingInvite.invitee_email}
-                    <span dangerouslySetInnerHTML={{ __html: '<!--email_on-->' }} />
+                    {pendingInvite.invitee_email.split('@')[0]}<span>@</span>{pendingInvite.invitee_email.split('@')[1]}
                   </p>
                   <CopyInviteButton inviteId={pendingInvite.id} />
                 </div>
