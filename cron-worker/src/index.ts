@@ -7,9 +7,9 @@ export default {
   async scheduled(event: any, env: Env, ctx: any) {
     const siteUrl = "https://sayyesapp.com";
     
-    // Check if it's Tuesday (day 2) or Sunday (day 0)
+    // Check if it's Tuesday or Sunday
     // event.cron might contain the cron string that triggered this
-    const isMidweek = event.cron === "0 9 * * 2";
+    const isMidweek = event.cron === "0 9 * * 2" || event.cron === "0 9 * * TUE";
     const endpoint = `${siteUrl}/api/cron/reminders${isMidweek ? "?type=midweek" : ""}`;
 
     console.log(`[Cron] Triggering ${isMidweek ? "mid-week" : "Sunday"} reminders at ${endpoint}...`);
