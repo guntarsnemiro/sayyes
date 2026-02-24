@@ -63,11 +63,9 @@ export async function POST(request: NextRequest) {
             SELECT subscription_json FROM push_subscriptions WHERE user_id = ?
           `).bind(partner.id).all<{ subscription_json: string }>();
 
-          if (partnerSubs.results && partnerSubs.results.length > 0) {
-            const title = partnerFinished ? 'Weekly Results Ready! ✨' : 'Partner Finished! ✨';
-            const body = partnerFinished 
-              ? `Both you and ${userName} have finished. Check your results now.` 
-              : `${userName} has completed their check-in. Now it's your turn!`;
+          if (partnerFinished && partnerSubs.results && partnerSubs.results.length > 0) {
+            const title = 'Weekly Results Ready! ✨';
+            const body = `Both you and ${userName} have finished. Check your results now.`;
             
             const pushPromises = partnerSubs.results.map(sub => 
               sendPushNotification(sub.subscription_json, title, body, '/dashboard')
@@ -75,33 +73,26 @@ export async function POST(request: NextRequest) {
             await Promise.all(pushPromises);
           }
 
-          // B. EMAIL NOTIFICATION
-          let subject, bodyText, buttonText, buttonUrl;
-
+          // B. EMAIL NOTIFICATION (Only if results are ready)
           if (partnerFinished) {
-            subject = 'Your weekly results are ready! ✨';
-            bodyText = `both you and ${userName} have finished your check-ins. Your alignment results and weekly focus are now ready to view.`;
-            buttonText = 'View Results';
-            buttonUrl = `${siteUrl}/dashboard/results`;
-          } else {
-            subject = `${userName} has finished their check-in!`;
-            bodyText = `${userName} just finished their weekly check-in. Now it's your turn! Once you're done, you'll be able to see where you're aligned this week.`;
-            buttonText = 'Start My Check-in';
-            buttonUrl = `${siteUrl}/dashboard`;
-          }
+            const subject = 'Your weekly results are ready! ✨';
+            const bodyText = `both you and ${userName} have finished your check-ins. Your alignment results and weekly focus are now ready to view.`;
+            const buttonText = 'View Results';
+            const buttonUrl = `${siteUrl}/dashboard/results`;
 
-          await sendEmail(env, {
-            to: partner.email,
-            subject,
-            text: `Hi ${partnerFirstName}, ${bodyText} ${buttonUrl}`,
-            html: getEmailTemplate(
-              partnerFirstName,
-              bodyText,
-              buttonText,
-              buttonUrl,
-              'You are receiving this because you are connected with your partner on SayYes.'
-            )
-          });
+            await sendEmail(env, {
+              to: partner.email,
+              subject,
+              text: `Hi ${partnerFirstName}, ${bodyText} ${buttonUrl}`,
+              html: getEmailTemplate(
+                partnerFirstName,
+                bodyText,
+                buttonText,
+                buttonUrl,
+                'You are receiving this because you are connected with your partner on SayYes.'
+              )
+            });
+          }
         }
       } catch (notifyErr) {
         console.error('Notification failed but check-in saved:', notifyErr);
