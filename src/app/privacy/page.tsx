@@ -3,22 +3,22 @@ import type { Metadata } from 'next';
 import Footer from '../Footer';
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — SayYes",
-  description: "SayYes is private-first. Learn how we protect your relationship data and keep your connection secure.",
+  title: "Privacy Policy — SayYes — Private-first relationship data protection",
+  description: "SayYes is private-first. Learn how we protect your relationship data and keep your connection secure through industry-standard encryption and minimal data collection.",
   alternates: {
     canonical: '/privacy',
   },
   openGraph: {
-    title: "Privacy Policy — SayYes",
-    description: "SayYes is private-first. Learn how we protect your relationship data and keep your connection secure.",
+    title: "Privacy Policy — SayYes — Private-first relationship data protection",
+    description: "SayYes is private-first. Learn how we protect your relationship data and keep your connection secure through industry-standard encryption and minimal data collection.",
     url: '/privacy',
     type: 'website',
     images: ["https://sayyesapp.com/icon.svg"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Privacy Policy — SayYes",
-    description: "SayYes is private-first. Learn how we protect your relationship data and keep your connection secure.",
+    title: "Privacy Policy — SayYes — Private-first relationship data protection",
+    description: "SayYes is private-first. Learn how we protect your relationship data and keep your connection secure through industry-standard encryption and minimal data collection.",
     images: ["https://sayyesapp.com/icon.svg"],
   },
 };

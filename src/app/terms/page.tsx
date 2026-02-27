@@ -3,22 +3,22 @@ import type { Metadata } from 'next';
 import Footer from '../Footer';
 
 export const metadata: Metadata = {
-  title: "Terms of Service — SayYes",
-  description: "Read the terms of service for SayYes, a weekly relationship check-in for couples.",
+  title: "Terms of Service — SayYes — Weekly relationship check-in for couples",
+  description: "Read the terms of service for SayYes, a weekly relationship check-in for couples. Understand our commitment to a safe, intentional, and non-clinical space for relationship reflection.",
   alternates: {
     canonical: '/terms',
   },
   openGraph: {
-    title: "Terms of Service — SayYes",
-    description: "Read the terms of service for SayYes, a weekly relationship check-in for couples.",
+    title: "Terms of Service — SayYes — Weekly relationship check-in for couples",
+    description: "Read the terms of service for SayYes, a weekly relationship check-in for couples. Understand our commitment to a safe, intentional, and non-clinical space for relationship reflection.",
     url: '/terms',
     type: 'website',
     images: ["https://sayyesapp.com/icon.svg"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Terms of Service — SayYes",
-    description: "Read the terms of service for SayYes, a weekly relationship check-in for couples.",
+    title: "Terms of Service — SayYes — Weekly relationship check-in for couples",
+    description: "Read the terms of service for SayYes, a weekly relationship check-in for couples. Understand our commitment to a safe, intentional, and non-clinical space for relationship reflection.",
     images: ["https://sayyesapp.com/icon.svg"],
   },
 };

@@ -3,22 +3,22 @@ import type { Metadata } from 'next';
 import Footer from '../Footer';
 
 export const metadata: Metadata = {
-  title: "How it works — SayYes",
-  description: "Learn how a simple weekly rhythm can prevent relationship drift and build sustainable clarity for long-term connection.",
+  title: "How it works — SayYes — Sustainable clarity for long-term connection",
+  description: "Learn how a simple weekly rhythm can prevent relationship drift and build sustainable clarity for long-term connection through private reflection and shared alignment.",
   alternates: {
     canonical: '/how-it-works',
   },
   openGraph: {
-    title: "How it works — SayYes",
-    description: "Learn how a simple weekly rhythm can prevent relationship drift and build sustainable clarity for long-term connection.",
+    title: "How it works — SayYes — Sustainable clarity for long-term connection",
+    description: "Learn how a simple weekly rhythm can prevent relationship drift and build sustainable clarity for long-term connection through private reflection and shared alignment.",
     url: '/how-it-works',
     type: 'website',
     images: ["https://sayyesapp.com/icon.svg"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "How it works — SayYes",
-    description: "Learn how a simple weekly rhythm can prevent relationship drift and build sustainable clarity for long-term connection.",
+    title: "How it works — SayYes — Sustainable clarity for long-term connection",
+    description: "Learn how a simple weekly rhythm can prevent relationship drift and build sustainable clarity for long-term connection through private reflection and shared alignment.",
     images: ["https://sayyesapp.com/icon.svg"],
   },
 };

@@ -4,13 +4,13 @@ import Footer from './Footer';
 
 export const metadata: Metadata = {
   title: "SayYes — A weekly connection for couples who choose to stay together",
-  description: "SayYes is a calm, weekly relationship check-in designed to prevent drift and keep your connection intentional.",
+  description: "SayYes is a calm, weekly relationship check-in designed to prevent drift and keep your connection intentional through a simple, private, and sustainable weekly rhythm.",
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: "SayYes — A weekly connection for couples who choose to stay together",
-    description: "SayYes is a calm, weekly relationship check-in designed to prevent drift and keep your connection intentional.",
+    description: "SayYes is a calm, weekly relationship check-in designed to prevent drift and keep your connection intentional through a simple, private, and sustainable weekly rhythm.",
     url: '/',
     type: 'website',
     images: ["https://sayyesapp.com/icon.svg"],
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "SayYes — A weekly connection for couples who choose to stay together",
-    description: "SayYes is a calm, weekly relationship check-in designed to prevent drift and keep your connection intentional.",
+    description: "SayYes is a calm, weekly relationship check-in designed to prevent drift and keep your connection intentional through a simple, private, and sustainable weekly rhythm.",
     images: ["https://sayyesapp.com/icon.svg"],
   },
 };
