@@ -1,10 +1,9 @@
 import { getSession } from '@/lib/auth/session';
+import { isAdmin } from '@/lib/auth/admin';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'edge';
-
-const ADMIN_EMAILS = ['guntarsnemiro@gmail.com'];
 
 export async function GET() {
   try {
@@ -13,7 +12,7 @@ export async function GET() {
     const db = env.DB;
     
     const user = await getSession(db);
-    if (!user || !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+    if (!user || !isAdmin(user.email, env)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -2,7 +2,7 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
 import { sendPushNotification } from '@/lib/push';
 import { getWeekDate } from '@/lib/checkin';
-import { sendBatchEmails, getEmailTemplate } from '@/lib/email';
+import { sendBatchEmails, getEmailTemplate, EMAIL_FROM } from '@/lib/email';
 
 export const runtime = 'edge';
 
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
 
         // EMAIL
         emailTasks.push({
-          from: 'SayYes <info@sayyesapp.com>',
+          from: EMAIL_FROM,
           to: user.email,
           subject,
           text: `Hi ${firstName}, ${bodyText} ${buttonUrl}`,

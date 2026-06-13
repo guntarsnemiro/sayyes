@@ -7,4 +7,5 @@ interface CloudflareEnv {
   RESEND_API_KEY: string;
   NEXT_PUBLIC_SITE_URL: string;
   CRON_SECRET: string;
+  ADMIN_EMAILS: string;
 }

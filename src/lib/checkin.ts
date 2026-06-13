@@ -32,12 +32,16 @@ export const CHECKIN_CATEGORIES = [
 ];
 
 export function getWeekDate() {
+  // Anchor every user to the same week bucket regardless of edge location
+  // by computing the most recent Sunday strictly in UTC (no Date mutation).
   const now = new Date();
-  const day = now.getDay();
-  // Get the date of the most recent Sunday
-  const diff = now.getDate() - day;
-  const sunday = new Date(now.setDate(diff));
-  return sunday.toISOString().split('T')[0];
+  const dayOfWeek = now.getUTCDay(); // 0 = Sunday
+  const sundayMs = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() - dayOfWeek
+  );
+  return new Date(sundayMs).toISOString().split('T')[0];
 }
 
 export const CONVERSATION_STARTERS: Record<string, string> = {
@@ -49,6 +53,21 @@ export const CONVERSATION_STARTERS: Record<string, string> = {
 };
 
 export type AlignmentState = 'aligned' | 'partially-aligned' | 'misaligned';
+
+// A weekly score means different things depending on whether both partners
+// answered ('alignment' = how closely they agree) or just one did
+// ('fulfillment' = the lone partner's own average). Tag it so the UI is honest.
+export type ScoreType = 'alignment' | 'fulfillment';
+
+export function getScoreType(
+  answers1: Record<string, number>,
+  answers2: Record<string, number>
+): ScoreType {
+  const bothAnswered = CHECKIN_CATEGORIES.some(
+    (cat) => answers1[cat.id] !== undefined && answers2[cat.id] !== undefined
+  );
+  return bothAnswered ? 'alignment' : 'fulfillment';
+}
 
 export function getAlignmentState(score1: number, score2: number): AlignmentState {
   const diff = Math.abs(score1 - score2);

@@ -1,3 +1,5 @@
+export const EMAIL_FROM = 'SayYes <info@sayyesapp.com>';
+
 export const sendEmail = async (env: CloudflareEnv, { to, subject, text, html }: { to: string, subject: string, text: string, html: string }) => {
   const resendApiKey = env.RESEND_API_KEY;
   if (!resendApiKey) {
@@ -13,7 +15,7 @@ export const sendEmail = async (env: CloudflareEnv, { to, subject, text, html }:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'SayYes <info@sayyesapp.com>',
+        from: EMAIL_FROM,
         to,
         subject,
         text,

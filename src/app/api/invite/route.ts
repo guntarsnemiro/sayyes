@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth/session';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
+import { sendEmail } from '@/lib/email';
 
 export const runtime = 'edge';
 
@@ -27,6 +28,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "You can't invite yourself" }, { status: 400 });
     }
 
+    // Rate limit: cap invites per inviter per hour to prevent abuse.
+    // Uses SQLite datetime() so it matches the created_at column format.
+    const recentInvites = await db.prepare(
+      "SELECT COUNT(*) as count FROM invitations WHERE inviter_id = ? AND created_at > datetime('now', '-1 hour')"
+    ).bind(user.id).first<{ count: number }>();
+
+    if ((recentInvites?.count || 0) >= 5) {
+      return NextResponse.json({
+        error: "You've sent too many invites recently. Please try again later.",
+      }, { status: 429 });
+    }
+
     const inviteId = crypto.randomUUID();
     
     // Save invitation to DB
@@ -35,48 +48,33 @@ export async function POST(request: NextRequest) {
       VALUES (?, ?, ?)
     `).bind(inviteId, user.id, inviteeEmail).run();
 
-    // Send invitation email via Resend
+    // Send invitation email via the shared email transport
     const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
     const inviteLink = `${siteUrl}/invite/${inviteId}`;
-    const resendApiKey = env.RESEND_API_KEY;
+    const inviterLabel = user.name || user.email;
 
-    if (resendApiKey) {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'SayYes <info@sayyesapp.com>',
-          to: inviteeEmail,
-          subject: `${user.name || 'Your partner'} invited you to SayYes`,
-          text: `Join your partner on SayYes: ${inviteLink}`, // Added plain text version
-          html: `
-            <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; padding: 40px 20px; color: #44403c;">
-              <h1 style="font-size: 24px; font-weight: 300; margin-bottom: 24px;">SayYes</h1>
-              <p style="font-size: 16px; line-height: 1.5; margin-bottom: 32px;">
-                ${user.name || user.email} has invited you to join them in a private, weekly connection space.
-              </p>
-              <div style="text-align: center;">
-                <a href="${inviteLink}" style="display: inline-block; background-color: #44403c; color: #ffffff; padding: 12px 32px; border-radius: 9999px; text-decoration: none; font-weight: 500;">
-                  Join your partner
-                </a>
-              </div>
-              <p style="font-size: 12px; color: #a8a29e; margin-top: 40px; border-top: 1px solid #e5e5e5; padding-top: 20px;">
-                SayYes — A weekly connection for couples.<br>
-                You are receiving this because your partner invited you.
-              </p>
-            </div>
-          `,
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error('Resend Invite Error:', errorData);
-      }
-    }
+    await sendEmail(env, {
+      to: inviteeEmail,
+      subject: `${user.name || 'Your partner'} invited you to SayYes`,
+      text: `Join your partner on SayYes: ${inviteLink}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; padding: 40px 20px; color: #44403c;">
+          <h1 style="font-size: 24px; font-weight: 300; margin-bottom: 24px;">SayYes</h1>
+          <p style="font-size: 16px; line-height: 1.5; margin-bottom: 32px;">
+            ${inviterLabel} has invited you to join them in a private, weekly connection space.
+          </p>
+          <div style="text-align: center;">
+            <a href="${inviteLink}" style="display: inline-block; background-color: #44403c; color: #ffffff; padding: 12px 32px; border-radius: 9999px; text-decoration: none; font-weight: 500;">
+              Join your partner
+            </a>
+          </div>
+          <p style="font-size: 12px; color: #a8a29e; margin-top: 40px; border-top: 1px solid #e5e5e5; padding-top: 20px;">
+            SayYes — A weekly connection for couples.<br>
+            You are receiving this because your partner invited you.
+          </p>
+        </div>
+      `,
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

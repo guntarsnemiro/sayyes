@@ -13,10 +13,21 @@ export const runtime = 'edge';
 
 interface InvitePageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }
 
-export default async function AcceptInvitePage({ params }: InvitePageProps) {
+const INVITE_ERRORS: Record<string, string> = {
+  wrong_account: 'This invitation was sent to a different email address. Please sign in with the email your partner invited.',
+  self_invite: "You can't accept your own invitation.",
+  already_coupled: "You're already connected with a partner.",
+  inviter_unavailable: 'The person who invited you is no longer available to connect.',
+  accept_failed: 'Something went wrong while accepting. Please try again.',
+};
+
+export default async function AcceptInvitePage({ params, searchParams }: InvitePageProps) {
   const { id } = await params;
+  const { error } = await searchParams;
+  const errorMessage = error ? INVITE_ERRORS[error] : null;
   const context = getRequestContext();
   const env = context.env as CloudflareEnv;
   const db = env.DB;
@@ -66,6 +77,15 @@ export default async function AcceptInvitePage({ params }: InvitePageProps) {
         </div>
 
         <div className="bg-white border border-[var(--accent)] rounded-3xl p-8 shadow-sm">
+          {errorMessage && (
+            <div className="mb-6 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-left">
+              <p className="text-xs text-rose-600 leading-relaxed">{errorMessage}</p>
+              {error === 'wrong_account' && (
+                <p className="mt-1 text-[10px] text-rose-400 lowercase">Invited: {invite.invitee_email}</p>
+              )}
+            </div>
+          )}
+
           <p className="text-sm text-[var(--muted)] leading-relaxed mb-8">
             By joining, you both will start a weekly check-in to stay aligned and connected.
           </p>

@@ -1,3 +1,7 @@
 GOOGLE_CLIENT_ID=your_client_id_here
 GOOGLE_CLIENT_SECRET=your_client_secret_here
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+RESEND_API_KEY=your_resend_api_key_here
+CRON_SECRET=your_cron_secret_here
+# Comma-separated list of admin email addresses
+ADMIN_EMAILS=you@example.com

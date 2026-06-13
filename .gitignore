@@ -8,3 +8,4 @@ dist
 !.env.template
 .wrangler
 *.log
+*.tsbuildinfo

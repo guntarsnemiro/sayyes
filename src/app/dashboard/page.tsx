@@ -1,10 +1,11 @@
 import { getSession } from '@/lib/auth/session';
-import { getWeekDate, calculateWeeklyScore, calculateAverageScore, getWeeklyFocus, CHECKIN_CATEGORIES } from '@/lib/checkin';
+import { getWeekDate, calculateWeeklyScore, calculateAverageScore, getWeeklyFocus, getScoreType, CHECKIN_CATEGORIES, type ScoreType } from '@/lib/checkin';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import InstallPrompt from './InstallPrompt';
 import CopyInviteButton from './CopyInviteButton';
+import { isAdmin } from '@/lib/auth/admin';
 
 export const runtime = 'edge';
 
@@ -29,7 +30,7 @@ export default async function DashboardPage() {
   }>();
   
   const currentUser = freshUser || user;
-  const isAdmin = ['guntarsnemiro@gmail.com'].includes(currentUser.email.toLowerCase());
+  const userIsAdmin = isAdmin(currentUser.email, env);
 
   // 1. AUTO-SYNC Couple ID
   let activeCoupleId = currentUser.couple_id;
@@ -103,7 +104,7 @@ export default async function DashboardPage() {
   }
 
   // 4. FETCH HISTORY & AVERAGES
-  let history: { week: string, score: number, average: number }[] = [];
+  let history: { week: string, score: number, average: number, type: ScoreType }[] = [];
   let eightWeekAvg = 0;
   
   const allCheckinsRes = await db.prepare(`
@@ -125,7 +126,8 @@ export default async function DashboardPage() {
     .map(([week, data]: [string, any]) => {
       const score = calculateWeeklyScore(data.user, data.partner);
       const average = calculateAverageScore(data.user, data.partner);
-      return { week, score, average };
+      const type = getScoreType(data.user, data.partner);
+      return { week, score, average, type };
     })
     .sort((a, b) => a.week.localeCompare(b.week))
     .slice(-8);
@@ -151,13 +153,14 @@ export default async function DashboardPage() {
     : 'your partner';
 
   const currentWeekAvg = history.length > 0 ? history[history.length - 1].average : 0;
+  const latestScoreType: ScoreType = history.length > 0 ? history[history.length - 1].type : (partner ? 'alignment' : 'fulfillment');
 
   return (
     <main className="flex min-h-screen flex-col bg-[var(--background)] p-6">
       <header className="flex justify-between items-center max-w-2xl mx-auto w-full mb-12">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-light tracking-tight text-[var(--primary)]">SayYes</h1>
-          {isAdmin && (
+          {userIsAdmin && (
             <Link href="/admin" className="text-[10px] text-stone-400 uppercase tracking-[0.2em] hover:text-stone-600 transition-colors pt-1">
               Admin
             </Link>
@@ -279,7 +282,7 @@ export default async function DashboardPage() {
                 <div className="text-right">
                   <p className="text-2xl font-light text-[var(--primary)]">{history[history.length-1].score}%</p>
                   <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest">
-                    {partner ? 'Alignment' : 'Self-Reflection'}
+                    {latestScoreType === 'alignment' ? 'Alignment' : 'Self-Reflection'}
                   </p>
                 </div>
               </div>

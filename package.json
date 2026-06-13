@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "pages:build": "npx @cloudflare/next-on-pages",
     "deploy": "npm run pages:build && wrangler pages deploy",
     "db:migrate": "wrangler d1 execute sayyes-db --remote --file=db/schema.sql"
@@ -27,6 +29,7 @@
     "eslint-config-next": "15.1.4",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vitest": "^4.1.8",
     "wrangler": "^4.60.0"
   }
 }
