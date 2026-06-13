@@ -93,10 +93,17 @@ export async function tryGenerateInsight(
     toPartnerInput(cat, responses[1])
   );
 
-  await db
-    .prepare("UPDATE deep_dives SET insight_json = ?, status = 'unlocked' WHERE id = ?")
-    .bind(JSON.stringify(insight), dive.id)
-    .run();
+  // Ephemeral privacy: once the shared insight exists, discard the raw
+  // free-text reflections. We keep the low-sensitivity structured fields
+  // (facet / what-would-help) but wipe the intimate prose.
+  await db.batch([
+    db
+      .prepare("UPDATE deep_dives SET insight_json = ?, status = 'unlocked' WHERE id = ?")
+      .bind(JSON.stringify(insight), dive.id),
+    db
+      .prepare('UPDATE deep_dive_responses SET reflection = NULL WHERE deep_dive_id = ?')
+      .bind(dive.id),
+  ]);
 
   return insight;
 }

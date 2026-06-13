@@ -141,6 +141,9 @@ export default async function ExplorePage() {
           <p className="text-center text-xs text-[var(--muted)] leading-relaxed pt-4 px-6">
             This is a starting point for a conversation, not a verdict. Be curious with each other.
           </p>
+          <p className="text-center text-[10px] text-[var(--muted)] uppercase tracking-widest pt-2">
+            Your individual reflections were discarded — only this shared insight remains.
+          </p>
         </div>
       </Shell>
     );
