@@ -220,6 +220,19 @@ export default async function DashboardPage() {
             )}
           </div>
 
+          {partner && userIsAdmin && (
+            <Link
+              href="/dashboard/explore"
+              className="block bg-white border border-[var(--accent)] rounded-3xl p-6 shadow-sm transition-all hover:border-[var(--primary)]/20"
+            >
+              <p className="text-xs text-[var(--muted)] uppercase tracking-widest mb-1">Explore together <span className="text-[var(--primary)]">· Beta</span></p>
+              <p className="text-[var(--primary)] font-medium">Go deeper on Intimacy & desire</p>
+              <p className="text-sm text-[var(--muted)] mt-1">
+                A private, guided reflection. We&apos;ll surface one shared insight — not your raw answers.
+              </p>
+            </Link>
+          )}
+
           {!currentUser.couple_id && !userDone && (
             <div className="bg-stone-50 border border-dashed border-[var(--accent)] rounded-3xl p-8 text-center shadow-sm">
               <h3 className="text-lg font-medium text-[var(--primary)] mb-4">Connect with your partner</h3>

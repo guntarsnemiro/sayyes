@@ -8,4 +8,6 @@ interface CloudflareEnv {
   NEXT_PUBLIC_SITE_URL: string;
   CRON_SECRET: string;
   ADMIN_EMAILS: string;
+  AI: Ai;
+  AI_MODEL?: string;
 }

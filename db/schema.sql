@@ -80,9 +80,37 @@ CREATE TABLE IF NOT EXISTS feedback (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- Optional, on-demand "deep dive" for a category (one per couple+category+week).
+-- Holds the AI-synthesized shared insight; raw reflections live in responses.
+CREATE TABLE IF NOT EXISTS deep_dives (
+    id TEXT PRIMARY KEY,
+    couple_id TEXT NOT NULL,
+    category TEXT NOT NULL,
+    week_date TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open', -- 'open' | 'unlocked'
+    insight_json TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(couple_id, category, week_date),
+    FOREIGN KEY (couple_id) REFERENCES couples(id)
+);
+
+CREATE TABLE IF NOT EXISTS deep_dive_responses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    deep_dive_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    primary_facet TEXT,
+    reflection TEXT,
+    what_would_help TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(deep_dive_id, user_id),
+    FOREIGN KEY (deep_dive_id) REFERENCES deep_dives(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_checkins_user_week ON checkins(user_id, week_date);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user ON push_subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_feedback_user ON feedback(user_id);
 CREATE INDEX IF NOT EXISTS idx_magic_links_email ON magic_links(email);
 CREATE INDEX IF NOT EXISTS idx_invitations_inviter ON invitations(inviter_id);
+CREATE INDEX IF NOT EXISTS idx_deep_dive_responses_dive ON deep_dive_responses(deep_dive_id);

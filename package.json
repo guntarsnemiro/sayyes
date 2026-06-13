@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "wrangler pages dev --d1 DB=8f2f12fd-7056-4fbf-9e7e-975f1e27ff25 -- next dev",
+    "dev": "wrangler pages dev --d1 DB=8f2f12fd-7056-4fbf-9e7e-975f1e27ff25 --ai AI -- next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "pages:build": "npx @cloudflare/next-on-pages",
     "deploy": "npm run pages:build && wrangler pages deploy",
-    "db:migrate": "wrangler d1 execute sayyes-db --remote --file=db/schema.sql"
+    "db:migrate": "wrangler d1 execute sayyes --remote --file=db/schema.sql"
   },
   "dependencies": {
     "@cloudflare/next-on-pages": "1.13.16",
